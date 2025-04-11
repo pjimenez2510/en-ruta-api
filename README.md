@@ -1,6 +1,145 @@
+# En Ruta API
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
+
+API desarrollada con NestJS y Prisma para el proyecto En Ruta.
+
+## Requisitos previos
+
+- Node.js (v20 o superior)
+- Docker y Docker Compose
+- npm o yarn
+
+## Configuración del entorno
+
+1. Clona este repositorio.
+2. Copia el archivo `.env.template` a `.env`:
+
+```bash
+cp .env.template .env
+```
+
+3. Ajusta las variables de entorno en el archivo `.env` según tu configuración local si es necesario.
+
+## Iniciar el proyecto
+
+### Con Makefile
+
+Si tienes Make instalado, puedes usar los siguientes comandos para gestionar fácilmente el proyecto:
+
+```bash
+# Iniciar el entorno de desarrollo
+make up-dev
+
+# Detener el entorno de desarrollo
+make down-dev
+
+# Conectar a la base de datos de desarrollo
+make connect-db-dev
+
+# Instalar dependencias
+make i-dep
+```
+
+### Sin Makefile
+
+Si no tienes Make instalado, puedes usar directamente los comandos de Docker Compose:
+
+```bash
+# Iniciar el entorno de desarrollo
+docker compose up -d --build my-service-dev
+
+# Detener el entorno de desarrollo
+docker compose rm -s -v my-service-dev db-dev
+
+# Conectar a la base de datos de desarrollo
+docker exec -it db-dev psql -U postgres development_db
+
+# Instalar dependencias
+docker exec -it en-ruta-api-dev yarn install
+```
+
+### Desarrollo local (sin Docker)
+
+Si prefieres trabajar sin Docker, puedes configurar el proyecto localmente:
+
+1. Instala las dependencias:
+
+```bash
+npm install
+# o
+yarn install
+```
+
+2. Asegúrate de tener una base de datos PostgreSQL corriendo y actualiza la variable `DATABASE_URL` en el archivo `.env`.
+
+3. Ejecuta las migraciones de Prisma:
+
+```bash
+npx prisma migrate dev
+```
+
+4. Genera el cliente de Prisma:
+
+```bash
+npx prisma generate
+```
+
+5. Inicia la aplicación en modo desarrollo:
+
+```bash
+npm run start:dev
+# o
+yarn start:dev
+```
+
+## Estructura del proyecto
+
+El proyecto sigue la estructura estándar de NestJS, con la adición de Prisma para la gestión de la base de datos:
+
+- `src/`: Código fuente de la aplicación
+- `prisma/`: Esquema y migraciones de Prisma
+- `dist/`: Código compilado (generado al construir)
+
+## Prisma Studio
+
+Para explorar y modificar la base de datos usando Prisma Studio:
+
+```bash
+# Con Docker
+docker exec -it en-ruta-api-dev npx prisma studio
+
+# Sin Docker
+npx prisma studio
+```
+
+Esto abrirá una interfaz web en `http://localhost:5555` donde podrás gestionar tus datos.
+
+## Comandos útiles
+
+```bash
+# Ejecutar pruebas unitarias
+npm run test
+
+# Ejecutar pruebas e2e
+npm run test:e2e
+
+# Verificar cobertura de pruebas
+npm run test:cov
+
+# Generar nuevas migraciones tras cambios en el esquema de Prisma
+npx prisma migrate dev --name nombre_descriptivo
+
+# Aplicar migraciones en entorno de producción
+npx prisma migrate deploy
+```
+
+## Documentación adicional
+
+- [Documentación de NestJS](https://docs.nestjs.com)
+- [Documentación de Prisma](https://www.prisma.io/docs)
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
