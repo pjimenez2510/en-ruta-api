@@ -1,0 +1,674 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// MODELOS PRINCIPALES
+
+model Tenant {
+  id              Int      @id @default(autoincrement())
+  nombre          String
+  identificador   String   @unique // Para subdominios/rutas
+  logoUrl         String?
+  colorPrimario   String?
+  colorSecundario String?
+  sitioWeb        String?
+  emailContacto   String?
+  telefono        String?
+  fechaRegistro   DateTime @default(now())
+  activo          Boolean  @default(true)
+
+  // Relaciones
+  usuarios                UsuarioTenant[]
+  buses                   Bus[]
+  pisosBus                PisoBus[]
+  tiposAsiento            TipoAsiento[]
+  asientos                Asiento[]
+  frecuenciasAsignadas    FrecuenciaAsignada[]
+  paradasFrecuencia       ParadaFrecuencia[]
+  frecuenciasHabilitadas  FrecuenciaHabilitada[]
+  preciosTramos           PrecioTramo[]
+  configuracionDescuentos ConfiguracionDescuento[]
+  hojasTrabajo            HojaTrabajo[]
+  ventas                  Venta[]
+  boletos                 Boleto[]
+  registrosAbordaje       RegistroAbordaje[]
+  configuraciones         Configuracion[]
+  notificaciones          Notificacion[]
+  caracteristicasBus      CaracteristicaBus[]
+  metodosPago             MetodoPago[]
+
+  @@map("tenants")
+}
+
+model Usuario {
+  id                     Int       @id @default(autoincrement())
+  email                  String    @unique
+  passwordHash           String
+  cedula                 String?   @unique
+  nombres                String
+  apellidos              String
+  fechaNacimiento        DateTime?
+  telefono               String?
+  esDiscapacitado        Boolean   @default(false)
+  porcentajeDiscapacidad Decimal?  @db.Decimal(5, 2)
+  fechaRegistro          DateTime  @default(now())
+  ultimoAcceso           DateTime?
+  activo                 Boolean   @default(true)
+
+  // Relaciones
+  tenants                 UsuarioTenant[]
+  ventasComprador         Venta[]            @relation("comprador")
+  ventasOficinista        Venta[]            @relation("oficinista")
+  boletosComprador        Boleto[]           @relation("pasajero")
+  registrosAbordaje       RegistroAbordaje[] @relation("registrador")
+  notificacionesRecibidas Notificacion[]
+
+  @@map("usuarios")
+}
+
+model UsuarioTenant {
+  id              Int        @id @default(autoincrement())
+  usuarioId       Int
+  tenantId        Int
+  rol             RolUsuario
+  fechaAsignacion DateTime   @default(now())
+  activo          Boolean    @default(true)
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+
+  // Relaciones con hojas de trabajo
+  hojasTrabajoConductor HojaTrabajo[] @relation("HojasConductor")
+  hojaTrabajoAyudante   HojaTrabajo[] @relation("HojasAyudante")
+
+  @@unique([usuarioId, tenantId, rol])
+  @@map("usuarios_tenants")
+}
+
+model Ciudad {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  provincia String
+  latitud   Decimal? @db.Decimal(10, 6)
+  longitud  Decimal? @db.Decimal(10, 6)
+  activo    Boolean  @default(true)
+
+  // Relaciones
+  frecuenciasOrigen  FrecuenciaAsignada[] @relation("CiudadOrigen")
+  frecuenciasDestino FrecuenciaAsignada[] @relation("CiudadDestino")
+  paradasFrecuencia  ParadaFrecuencia[]
+  rutasOrigen        PrecioTramo[]        @relation("CiudadTramoOrigen")
+  rutasDestino       PrecioTramo[]        @relation("CiudadTramoDestino")
+  boletosOrigen      Boleto[]             @relation("CiudadBoletoOrigen")
+  boletosDestino     Boleto[]             @relation("CiudadBoletoDestino")
+
+  @@map("ciudades")
+}
+
+model ResolucionANT {
+  id               Int       @id @default(autoincrement())
+  numeroResolucion String
+  fechaEmision     DateTime
+  fechaVigencia    DateTime?
+  documentoUrl     String?
+  descripcion      String?
+  activo           Boolean   @default(true)
+
+  // Relaciones
+  frecuenciasAsignadas FrecuenciaAsignada[]
+
+  @@map("resoluciones_ant")
+}
+
+// MODELOS PARA BUSES Y CONFIGURACIÓN DE ASIENTOS
+
+// Modelo para plantillas de buses
+model ModeloBus {
+  id             Int     @id @default(autoincrement())
+  marca          String
+  modelo         String
+  tipoChasis     String?
+  tipoCarroceria String?
+  anioModelo     Int?
+  numeroPisos    Int     @default(1)
+  descripcion    String?
+  esPublico      Boolean @default(true)
+
+  // Relaciones
+  plantillasPiso PlantillaPiso[]
+  buses          Bus[]
+
+  @@unique([marca, modelo])
+  @@map("modelos_bus")
+}
+
+// Plantillas de distribución de asientos para pisos
+model PlantillaPiso {
+  id          Int     @id @default(autoincrement())
+  modeloBusId Int
+  numeroPiso  Int
+  filas       Int
+  columnas    Int
+  descripcion String?
+  esPublico   Boolean @default(true)
+
+  // Relaciones
+  modeloBus          ModeloBus                   @relation(fields: [modeloBusId], references: [id])
+  ubicacionesAsiento UbicacionAsientoPlantilla[]
+  pisosBus           PisoBus[]
+
+  @@unique([modeloBusId, numeroPiso])
+  @@map("plantillas_piso")
+}
+
+// Posiciones de asientos en la plantilla
+model UbicacionAsientoPlantilla {
+  id              Int     @id @default(autoincrement())
+  plantillaPisoId Int
+  fila            Int
+  columna         Int
+  estaHabilitado  Boolean @default(true)
+
+  // Relaciones
+  plantillaPiso PlantillaPiso @relation(fields: [plantillaPisoId], references: [id], onDelete: Cascade)
+
+  @@unique([plantillaPisoId, fila, columna])
+  @@map("ubicaciones_asiento_plantilla")
+}
+
+model Bus {
+  id              Int       @id @default(autoincrement())
+  tenantId        Int // Discriminador de tenant
+  modeloBusId     Int
+  numero          Int
+  placa           String
+  anioFabricacion Int?
+  totalAsientos   Int
+  fotoUrl         String?
+  tipoCombustible String?
+  fechaIngreso    DateTime
+  estado          EstadoBus @default(ACTIVO)
+
+  // Relaciones
+  tenant          Tenant              @relation(fields: [tenantId], references: [id])
+  modeloBus       ModeloBus           @relation(fields: [modeloBusId], references: [id])
+  pisos           PisoBus[]
+  asientos        Asiento[]
+  hojasTrabajo    HojaTrabajo[]
+  caracteristicas CaracteristicaBus[]
+
+  @@unique([tenantId, placa])
+  @@unique([tenantId, numero])
+  @@index([tenantId])
+  @@map("buses")
+}
+
+// Modelo para pisos de buses (reemplaza JSON)
+model PisoBus {
+  id              Int  @id @default(autoincrement())
+  tenantId        Int
+  busId           Int
+  numeroPiso      Int
+  plantillaPisoId Int?
+
+  // Relaciones
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  bus           Bus            @relation(fields: [busId], references: [id], onDelete: Cascade)
+  plantillaPiso PlantillaPiso? @relation(fields: [plantillaPisoId], references: [id])
+  asientos      Asiento[]
+
+  @@unique([busId, numeroPiso])
+  @@index([tenantId])
+  @@map("pisos_bus")
+}
+
+// Características del bus (reemplaza el campo JSON)
+model CaracteristicaBus {
+  id       Int    @id @default(autoincrement())
+  tenantId Int
+  busId    Int
+  nombre   String
+  valor    String
+
+  // Relaciones
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  bus    Bus    @relation(fields: [busId], references: [id], onDelete: Cascade)
+
+  @@unique([busId, nombre])
+  @@index([tenantId])
+  @@map("caracteristicas_bus")
+}
+
+model TipoAsiento {
+  id           Int     @id @default(autoincrement())
+  tenantId     Int // Discriminador de tenant
+  nombre       String
+  descripcion  String?
+  factorPrecio Decimal @default(1.00) @db.Decimal(5, 2)
+  color        String?
+  icono        String?
+  activo       Boolean @default(true)
+
+  // Relaciones
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  asientos Asiento[]
+
+  @@unique([tenantId, nombre])
+  @@index([tenantId])
+  @@map("tipos_asiento")
+}
+
+model Asiento {
+  id        Int           @id @default(autoincrement())
+  tenantId  Int // Discriminador de tenant
+  busId     Int
+  pisoBusId Int
+  numero    String
+  fila      Int
+  columna   Int
+  tipoId    Int
+  estado    EstadoAsiento @default(DISPONIBLE)
+  notas     String?
+
+  // Relaciones
+  tenant  Tenant      @relation(fields: [tenantId], references: [id])
+  bus     Bus         @relation(fields: [busId], references: [id])
+  pisoBus PisoBus     @relation(fields: [pisoBusId], references: [id])
+  tipo    TipoAsiento @relation(fields: [tipoId], references: [id])
+  boletos Boleto[]
+
+  @@unique([tenantId, busId, numero])
+  @@index([tenantId])
+  @@map("asientos")
+}
+
+// MODELOS PARA FRECUENCIAS Y RUTAS
+
+model FrecuenciaAsignada {
+  id               Int       @id @default(autoincrement())
+  tenantId         Int // Discriminador de tenant
+  resolucionId     Int
+  ciudadOrigenId   Int
+  ciudadDestinoId  Int
+  horaSalida       DateTime
+  duracionEstimada Int
+  distancia        Decimal?  @db.Decimal(10, 2)
+  fechaAsignacion  DateTime?
+  activo           Boolean   @default(true)
+
+  // Relaciones
+  tenant                 Tenant                 @relation(fields: [tenantId], references: [id])
+  resolucion             ResolucionANT          @relation(fields: [resolucionId], references: [id])
+  ciudadOrigen           Ciudad                 @relation("CiudadOrigen", fields: [ciudadOrigenId], references: [id])
+  ciudadDestino          Ciudad                 @relation("CiudadDestino", fields: [ciudadDestinoId], references: [id])
+  paradasFrecuencia      ParadaFrecuencia[]
+  frecuenciasHabilitadas FrecuenciaHabilitada[]
+
+  @@index([tenantId])
+  @@map("frecuencias_asignadas")
+}
+
+model ParadaFrecuencia {
+  id            Int     @id @default(autoincrement())
+  tenantId      Int // Discriminador de tenant
+  frecuenciaId  Int
+  ciudadId      Int
+  orden         Int
+  tiempoLlegada Int
+  tiempoParada  Int     @default(5)
+  esTerminal    Boolean @default(false)
+
+  // Relaciones
+  tenant     Tenant             @relation(fields: [tenantId], references: [id])
+  frecuencia FrecuenciaAsignada @relation(fields: [frecuenciaId], references: [id])
+  ciudad     Ciudad             @relation(fields: [ciudadId], references: [id])
+
+  @@unique([tenantId, frecuenciaId, ciudadId])
+  @@index([tenantId])
+  @@map("paradas_frecuencia")
+}
+
+model FrecuenciaHabilitada {
+  id            Int       @id @default(autoincrement())
+  tenantId      Int // Discriminador de tenant
+  frecuenciaId  Int
+  diasOperacion String // 7 caracteres, uno por día "1111100"
+  horaSalida    DateTime?
+  precioBase    Decimal   @db.Decimal(10, 2)
+  tipoViaje     TipoViaje @default(CON_PARADAS)
+  activo        Boolean   @default(true)
+
+  // Relaciones
+  tenant        Tenant             @relation(fields: [tenantId], references: [id])
+  frecuencia    FrecuenciaAsignada @relation(fields: [frecuenciaId], references: [id])
+  preciosTramos PrecioTramo[]
+  hojasTrabajo  HojaTrabajo[]
+
+  @@index([tenantId])
+  @@map("frecuencias_habilitadas")
+}
+
+// MODELOS PARA PRECIOS
+
+model PrecioTramo {
+  id              Int     @id @default(autoincrement())
+  tenantId        Int // Discriminador de tenant
+  frecuenciaId    Int
+  ciudadOrigenId  Int
+  ciudadDestinoId Int
+  precio          Decimal @db.Decimal(10, 2)
+
+  // Relaciones
+  tenant        Tenant               @relation(fields: [tenantId], references: [id])
+  frecuencia    FrecuenciaHabilitada @relation(fields: [frecuenciaId], references: [id])
+  ciudadOrigen  Ciudad               @relation("CiudadTramoOrigen", fields: [ciudadOrigenId], references: [id])
+  ciudadDestino Ciudad               @relation("CiudadTramoDestino", fields: [ciudadDestinoId], references: [id])
+
+  @@unique([tenantId, frecuenciaId, ciudadOrigenId, ciudadDestinoId])
+  @@index([tenantId])
+  @@map("precios_tramos")
+}
+
+model ConfiguracionDescuento {
+  id                 Int           @id @default(autoincrement())
+  tenantId           Int // Discriminador de tenant
+  tipo               TipoDescuento
+  porcentaje         Decimal       @db.Decimal(5, 2)
+  requiereValidacion Boolean       @default(true)
+  activo             Boolean       @default(true)
+
+  // Relaciones
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, tipo])
+  @@index([tenantId])
+  @@map("configuracion_descuentos")
+}
+
+// MODELOS PARA PROGRAMACIÓN Y VIAJES
+
+model HojaTrabajo {
+  id                     Int               @id @default(autoincrement())
+  tenantId               Int // Discriminador de tenant
+  fecha                  DateTime          @db.Date
+  frecuenciaHabilitadaId Int
+  busId                  Int
+  conductorId            Int?
+  ayudanteId             Int?
+  estado                 EstadoHojaTrabajo @default(PROGRAMADO)
+  observaciones          String?
+  generacion             TipoGeneracion
+
+  // Relaciones
+  tenant               Tenant               @relation(fields: [tenantId], references: [id])
+  frecuenciaHabilitada FrecuenciaHabilitada @relation(fields: [frecuenciaHabilitadaId], references: [id])
+  bus                  Bus                  @relation(fields: [busId], references: [id])
+  conductor            UsuarioTenant?       @relation("HojasConductor", fields: [conductorId], references: [id])
+  ayudante             UsuarioTenant?       @relation("HojasAyudante", fields: [ayudanteId], references: [id])
+  ventas               Venta[]
+
+  @@unique([tenantId, fecha, frecuenciaHabilitadaId])
+  @@index([tenantId])
+  @@map("hoja_trabajo")
+}
+
+// MODELOS PARA VENTAS Y BOLETOS
+
+// Nuevo modelo para métodos de pago
+model MetodoPago {
+  id            Int     @id @default(autoincrement())
+  tenantId      Int
+  nombre        String
+  descripcion   String?
+  procesador    String? // PayPal, Transferencia, etc.
+  configuracion String? // Datos de configuración como cuenta, merchant ID, etc.
+  activo        Boolean @default(true)
+
+  // Relaciones
+  tenant Tenant  @relation(fields: [tenantId], references: [id])
+  ventas Venta[]
+
+  @@unique([tenantId, nombre])
+  @@index([tenantId])
+  @@map("metodos_pago")
+}
+
+model Venta {
+  id                Int         @id @default(autoincrement())
+  tenantId          Int // Discriminador de tenant
+  hojaId            Int
+  usuarioId         Int // Comprador o oficinista
+  oficinistaId      Int? // NULL si es compra directa
+  fechaVenta        DateTime    @default(now())
+  metodoPagoId      Int
+  totalSinDescuento Decimal     @db.Decimal(10, 2)
+  totalDescuentos   Decimal     @default(0) @db.Decimal(10, 2)
+  totalFinal        Decimal     @db.Decimal(10, 2)
+  estadoPago        EstadoPago  @default(PENDIENTE)
+  comprobanteUrl    String?
+  codigoTransaccion String?
+  origenVenta       OrigenVenta
+  ipCompra          String?
+  dispositivoInfo   String?
+  notas             String?
+
+  // Relaciones
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  hojaTrabajo HojaTrabajo @relation(fields: [hojaId], references: [id])
+  comprador   Usuario     @relation("comprador", fields: [usuarioId], references: [id])
+  oficinista  Usuario?    @relation("oficinista", fields: [oficinistaId], references: [id])
+  metodoPago  MetodoPago  @relation(fields: [metodoPagoId], references: [id])
+  boletos     Boleto[]
+
+  @@index([tenantId])
+  @@map("ventas")
+}
+
+// Modelo para información de pasajero (reemplaza el campo JSON)
+model InformacionPasajero {
+  id              Int       @id @default(autoincrement())
+  boletoId        Int       @unique
+  nombreCompleto  String
+  tipoDocumento   String    @default("CEDULA")
+  numeroDocumento String
+  telefono        String?
+  email           String?
+  fechaNacimiento DateTime?
+
+  // Relaciones
+  boleto Boleto @relation(fields: [boletoId], references: [id], onDelete: Cascade)
+
+  @@map("informacion_pasajeros")
+}
+
+model Boleto {
+  id                  Int                  @id @default(autoincrement())
+  tenantId            Int // Discriminador de tenant
+  ventaId             Int
+  pasajeroId          Int?
+  asientoId           Int
+  ciudadOrigenId      Int
+  ciudadDestinoId     Int
+  fechaViaje          DateTime             @db.Date
+  horaSalida          DateTime
+  precioBase          Decimal              @db.Decimal(10, 2)
+  tipoDescuento       TipoDescuentoCliente @default(NINGUNO)
+  porcentajeDescuento Decimal              @default(0) @db.Decimal(5, 2)
+  precioFinal         Decimal              @db.Decimal(10, 2)
+  codigoAcceso        String               @unique
+  estado              EstadoBoleto         @default(PENDIENTE)
+
+  // Relaciones
+  tenant              Tenant               @relation(fields: [tenantId], references: [id])
+  venta               Venta                @relation(fields: [ventaId], references: [id])
+  pasajero            Usuario?             @relation("pasajero", fields: [pasajeroId], references: [id])
+  asiento             Asiento              @relation(fields: [asientoId], references: [id])
+  ciudadOrigen        Ciudad               @relation("CiudadBoletoOrigen", fields: [ciudadOrigenId], references: [id])
+  ciudadDestino       Ciudad               @relation("CiudadBoletoDestino", fields: [ciudadDestinoId], references: [id])
+  registrosAbordaje   RegistroAbordaje[]
+  informacionPasajero InformacionPasajero?
+
+  @@index([tenantId])
+  @@map("boletos")
+}
+
+model RegistroAbordaje {
+  id              Int            @id @default(autoincrement())
+  tenantId        Int // Discriminador de tenant
+  boletoId        Int
+  usuarioId       Int // Quien registra (chofer/ayudante)
+  fechaHora       DateTime       @default(now())
+  metodo          MetodoAbordaje @default(ESCANEO)
+  dispositivoInfo String?
+  latitud         Decimal?       @db.Decimal(10, 6)
+  longitud        Decimal?       @db.Decimal(10, 6)
+  observaciones   String?
+
+  // Relaciones
+  tenant      Tenant  @relation(fields: [tenantId], references: [id])
+  boleto      Boleto  @relation(fields: [boletoId], references: [id])
+  registrador Usuario @relation("registrador", fields: [usuarioId], references: [id])
+
+  @@index([tenantId])
+  @@map("registros_abordaje")
+}
+
+model Configuracion {
+  id                Int               @id @default(autoincrement())
+  tenantId          Int // Discriminador de tenant
+  clave             String
+  valor             String?
+  tipo              TipoConfiguracion
+  descripcion       String?
+  fechaModificacion DateTime          @default(now())
+
+  // Relaciones
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, clave])
+  @@index([tenantId])
+  @@map("configuraciones")
+}
+
+model Notificacion {
+  id                 Int              @id @default(autoincrement())
+  tenantId           Int // Discriminador de tenant
+  usuarioId          Int
+  tipo               TipoNotificacion
+  titulo             String
+  mensaje            String
+  fechaCreacion      DateTime         @default(now())
+  fechaLectura       DateTime?
+  entidadRelacionada String?
+  entidadId          Int?
+  accionUrl          String?
+  leida              Boolean          @default(false)
+
+  // Relaciones
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@index([tenantId])
+  @@map("notificaciones")
+}
+
+// ENUMERACIONES
+
+enum RolUsuario {
+  ADMIN_SISTEMA
+  ADMIN_COOPERATIVA
+  OFICINISTA
+  CONDUCTOR
+  AYUDANTE
+  CLIENTE
+}
+
+enum EstadoBus {
+  ACTIVO
+  MANTENIMIENTO
+  RETIRADO
+}
+
+enum EstadoAsiento {
+  DISPONIBLE
+  OCUPADO
+  MANTENIMIENTO
+  RESERVADO
+}
+
+enum TipoViaje {
+  DIRECTO
+  CON_PARADAS
+}
+
+enum TipoDescuento {
+  MENOR_EDAD
+  TERCERA_EDAD
+  DISCAPACIDAD
+}
+
+enum EstadoHojaTrabajo {
+  PROGRAMADO
+  EN_CURSO
+  COMPLETADO
+  CANCELADO
+}
+
+enum TipoGeneracion {
+  MANUAL
+  AUTOMATICA
+}
+
+enum EstadoPago {
+  PENDIENTE
+  VERIFICANDO
+  APROBADO
+  RECHAZADO
+}
+
+enum OrigenVenta {
+  WEB
+  MOVIL
+  OFICINA
+}
+
+enum TipoDescuentoCliente {
+  NINGUNO
+  MENOR_EDAD
+  TERCERA_EDAD
+  DISCAPACIDAD
+}
+
+enum EstadoBoleto {
+  PENDIENTE
+  CONFIRMADO
+  ABORDADO
+  NO_SHOW
+  CANCELADO
+}
+
+enum MetodoAbordaje {
+  ESCANEO
+  MANUAL
+}
+
+enum TipoConfiguracion {
+  TEXTO
+  NUMERO
+  BOOLEANO
+  JSON
+}
+
+enum TipoNotificacion {
+  COMPRA
+  CAMBIO_ESTADO
+  RECORDATORIO
+  PROMOCION
+  SISTEMA
+}
