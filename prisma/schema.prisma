@@ -46,30 +46,48 @@ model Tenant {
 }
 
 model Usuario {
-  id                     Int         @id @default(autoincrement())
-  email                  String      @unique
-  passwordHash           String
-  cedula                 String?     @unique
-  nombres                String
-  apellidos              String
-  fechaNacimiento        DateTime?
-  telefono               String?
-  esDiscapacitado        Boolean     @default(false)
-  porcentajeDiscapacidad Decimal?    @db.Decimal(5, 2)
-  fechaRegistro          DateTime    @default(now())
-  ultimoAcceso           DateTime?
-  activo                 Boolean     @default(true)
-  tipoUsuario            TipoUsuario @default(CLIENTE)
+  id            Int         @id @default(autoincrement())
+  email         String      @unique
+  passwordHash  String
+  fechaRegistro DateTime    @default(now())
+  ultimoAcceso  DateTime?
+  activo        Boolean     @default(true)
+  tipoUsuario   TipoUsuario @default(CLIENTE)
 
   // Relaciones
   tenants                 UsuarioTenant[]
   ventasComprador         Venta[]            @relation("comprador")
   ventasOficinista        Venta[]            @relation("oficinista")
-  boletosComprador        Boleto[]           @relation("pasajero")
+  cliente                 Cliente? // Relación one-to-one con Cliente
   registrosAbordaje       RegistroAbordaje[] @relation("registrador")
   notificacionesRecibidas Notificacion[]
 
   @@map("usuarios")
+}
+
+// Nuevo modelo que separa datos de autenticación (Usuario) de datos personales (Cliente)
+model Cliente {
+  id                     Int       @id @default(autoincrement())
+  nombres                String
+  apellidos              String
+  tipoDocumento          String    @default("CEDULA")
+  numeroDocumento        String
+  telefono               String?
+  email                  String?
+  fechaNacimiento        DateTime?
+  esDiscapacitado        Boolean   @default(false)
+  porcentajeDiscapacidad Decimal?  @db.Decimal(5, 2)
+  usuarioId              Int?      @unique // Vínculo opcional a Usuario
+  fechaRegistro          DateTime  @default(now())
+  ultimaActualizacion    DateTime  @default(now())
+  activo                 Boolean   @default(true)
+
+  // Relaciones
+  usuario Usuario? @relation(fields: [usuarioId], references: [id]) // Relación opcional a Usuario
+  boletos Boleto[]
+
+  @@unique([tipoDocumento, numeroDocumento])
+  @@map("clientes")
 }
 
 model UsuarioTenant {
@@ -200,7 +218,6 @@ model Bus {
   tenant          Tenant              @relation(fields: [tenantId], references: [id])
   modeloBus       ModeloBus           @relation(fields: [modeloBusId], references: [id])
   pisos           PisoBus[]
-  asientos        Asiento[]
   hojasTrabajo    HojaTrabajo[]
   caracteristicas CaracteristicaBus[]
 
@@ -268,7 +285,6 @@ model TipoAsiento {
 model Asiento {
   id        Int           @id @default(autoincrement())
   tenantId  Int // Discriminador de tenant
-  busId     Int
   pisoBusId Int
   numero    String
   fila      Int
@@ -279,12 +295,11 @@ model Asiento {
 
   // Relaciones
   tenant  Tenant      @relation(fields: [tenantId], references: [id])
-  bus     Bus         @relation(fields: [busId], references: [id])
   pisoBus PisoBus     @relation(fields: [pisoBusId], references: [id])
   tipo    TipoAsiento @relation(fields: [tipoId], references: [id])
   boletos Boleto[]
 
-  @@unique([tenantId, busId, numero])
+  @@unique([tenantId, pisoBusId, numero])
   @@index([tenantId])
   @@map("asientos")
 }
@@ -471,28 +486,11 @@ model Venta {
   @@map("ventas")
 }
 
-// Modelo para información de pasajero (reemplaza el campo JSON)
-model InformacionPasajero {
-  id              Int       @id @default(autoincrement())
-  boletoId        Int       @unique
-  nombreCompleto  String
-  tipoDocumento   String    @default("CEDULA")
-  numeroDocumento String
-  telefono        String?
-  email           String?
-  fechaNacimiento DateTime?
-
-  // Relaciones
-  boleto Boleto @relation(fields: [boletoId], references: [id], onDelete: Cascade)
-
-  @@map("informacion_pasajeros")
-}
-
 model Boleto {
   id                  Int                  @id @default(autoincrement())
   tenantId            Int // Discriminador de tenant
   ventaId             Int
-  pasajeroId          Int?
+  clienteId           Int
   asientoId           Int
   ciudadOrigenId      Int
   ciudadDestinoId     Int
@@ -506,14 +504,13 @@ model Boleto {
   estado              EstadoBoleto         @default(PENDIENTE)
 
   // Relaciones
-  tenant              Tenant               @relation(fields: [tenantId], references: [id])
-  venta               Venta                @relation(fields: [ventaId], references: [id])
-  pasajero            Usuario?             @relation("pasajero", fields: [pasajeroId], references: [id])
-  asiento             Asiento              @relation(fields: [asientoId], references: [id])
-  ciudadOrigen        Ciudad               @relation("CiudadBoletoOrigen", fields: [ciudadOrigenId], references: [id])
-  ciudadDestino       Ciudad               @relation("CiudadBoletoDestino", fields: [ciudadDestinoId], references: [id])
-  registrosAbordaje   RegistroAbordaje[]
-  informacionPasajero InformacionPasajero?
+  tenant            Tenant             @relation(fields: [tenantId], references: [id])
+  venta             Venta              @relation(fields: [ventaId], references: [id])
+  cliente           Cliente            @relation(fields: [clienteId], references: [id])
+  asiento           Asiento            @relation(fields: [asientoId], references: [id])
+  ciudadOrigen      Ciudad             @relation("CiudadBoletoOrigen", fields: [ciudadOrigenId], references: [id])
+  ciudadDestino     Ciudad             @relation("CiudadBoletoDestino", fields: [ciudadDestinoId], references: [id])
+  registrosAbordaje RegistroAbordaje[]
 
   @@index([tenantId])
   @@map("boletos")
