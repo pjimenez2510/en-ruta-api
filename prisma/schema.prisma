@@ -46,19 +46,20 @@ model Tenant {
 }
 
 model Usuario {
-  id                     Int       @id @default(autoincrement())
-  email                  String    @unique
+  id                     Int         @id @default(autoincrement())
+  email                  String      @unique
   passwordHash           String
-  cedula                 String?   @unique
+  cedula                 String?     @unique
   nombres                String
   apellidos              String
   fechaNacimiento        DateTime?
   telefono               String?
-  esDiscapacitado        Boolean   @default(false)
-  porcentajeDiscapacidad Decimal?  @db.Decimal(5, 2)
-  fechaRegistro          DateTime  @default(now())
+  esDiscapacitado        Boolean     @default(false)
+  porcentajeDiscapacidad Decimal?    @db.Decimal(5, 2)
+  fechaRegistro          DateTime    @default(now())
   ultimoAcceso           DateTime?
-  activo                 Boolean   @default(true)
+  activo                 Boolean     @default(true)
+  tipoUsuario            TipoUsuario @default(CLIENTE)
 
   // Relaciones
   tenants                 UsuarioTenant[]
@@ -580,13 +581,17 @@ model Notificacion {
 
 // ENUMERACIONES
 
-enum RolUsuario {
+enum TipoUsuario {
+  CLIENTE
   ADMIN_SISTEMA
+  PERSONAL_COOPERATIVA
+}
+
+enum RolUsuario {
   ADMIN_COOPERATIVA
   OFICINISTA
   CONDUCTOR
   AYUDANTE
-  CLIENTE
 }
 
 enum EstadoBus {
