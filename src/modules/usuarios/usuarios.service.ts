@@ -94,13 +94,13 @@ export class UsuariosService {
   }
 
   async buscarPorEmail(email: string): Promise<Usuario | null> {
-    return this.prisma.usuario.findUnique({
+    return await this.prisma.usuario.findUnique({
       where: { email },
     });
   }
 
   async buscarPorId(id: number): Promise<Usuario | null> {
-    return this.prisma.usuario.findUnique({
+    return await this.prisma.usuario.findUnique({
       where: { id },
     });
   }
@@ -122,7 +122,7 @@ export class UsuariosService {
   }
 
   async obtenerTenantsDeUsuario(usuarioId: number) {
-    return this.prisma.usuarioTenant.findMany({
+    return await this.prisma.usuarioTenant.findMany({
       where: { usuarioId, activo: true },
       include: {
         tenant: true,
@@ -132,13 +132,13 @@ export class UsuariosService {
 
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
-    return bcrypt.hash(password, salt);
+    return await bcrypt.hash(password, salt);
   }
 
   private async validarPassword(
     password: string,
     hash: string,
   ): Promise<boolean> {
-    return bcrypt.compare(password, hash);
+    return await bcrypt.compare(password, hash);
   }
 }
