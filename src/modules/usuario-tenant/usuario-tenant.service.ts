@@ -6,10 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { CreateUsuarioTenantDto, UpdateUsuarioTenantDto } from './dto';
-import {
-  USUARIO_TENANT_SELECT,
-  USUARIO_TENANT_SELECT_WITH_RELATIONS,
-} from './constants/usuario-tenant';
+import { USUARIO_TENANT_SELECT_WITH_RELATIONS } from './constants/usuario-tenant';
 
 @Injectable()
 export class UsuarioTenantService {
@@ -50,7 +47,6 @@ export class UsuarioTenantService {
     datos: CreateUsuarioTenantDto,
     tx?: Prisma.TransactionClient,
   ) {
-    // Verificar que el usuario exista
     const usuario = await this.prisma.usuario.findUnique({
       where: { id: datos.usuarioId },
     });
@@ -61,7 +57,6 @@ export class UsuarioTenantService {
       );
     }
 
-    // Verificar que el tenant exista
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: datos.tenantId },
     });
@@ -72,7 +67,6 @@ export class UsuarioTenantService {
       );
     }
 
-    // Verificar si ya existe una relación con el mismo usuario, tenant y rol
     const existente = await this.prisma.usuarioTenant.findFirst({
       where: {
         usuarioId: datos.usuarioId,
@@ -106,7 +100,6 @@ export class UsuarioTenantService {
   ) {
     await this.obtenerUsuarioTenant({ id });
 
-    // Si se cambia el rol, verificar que no exista otra relación con el mismo usuario, tenant y rol
     if (datos.rol) {
       const usuarioTenant = await this.prisma.usuarioTenant.findUnique({
         where: { id },
