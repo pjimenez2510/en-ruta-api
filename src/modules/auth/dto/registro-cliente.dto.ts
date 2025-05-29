@@ -1,92 +1,13 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TipoDocumento } from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
   IsString,
-  IsOptional,
   MinLength,
-  IsEnum,
-  IsBoolean,
-  IsNumber,
-  IsDateString,
   ValidateNested,
 } from 'class-validator';
-
-export class ClienteDto {
-  @ApiProperty({
-    description: 'Nombres del cliente',
-    example: 'Juan Antonio',
-  })
-  @IsString()
-  @IsNotEmpty()
-  nombres: string;
-
-  @ApiProperty({
-    description: 'Apellidos del cliente',
-    example: 'Pérez González',
-  })
-  @IsString()
-  @IsNotEmpty()
-  apellidos: string;
-
-  @ApiProperty({
-    description: 'Tipo de documento',
-    enum: TipoDocumento,
-    example: TipoDocumento.CEDULA,
-  })
-  @IsEnum(TipoDocumento)
-  tipoDocumento: TipoDocumento;
-
-  @ApiProperty({
-    description: 'Número de documento',
-    example: '1712345678',
-  })
-  @IsString()
-  @IsNotEmpty()
-  numeroDocumento: string;
-
-  @ApiPropertyOptional({
-    description: 'Teléfono de contacto',
-    example: '+593987654321',
-  })
-  @IsOptional()
-  @IsString()
-  telefono?: string;
-
-  @ApiPropertyOptional({
-    description: 'Email de contacto',
-    example: 'cliente@ejemplo.com',
-  })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({
-    description: 'Fecha de nacimiento (YYYY-MM-DD)',
-    example: '1990-01-01',
-  })
-  @IsOptional()
-  @IsDateString()
-  fechaNacimiento?: string;
-
-  @ApiPropertyOptional({
-    description: 'Indica si el cliente tiene alguna discapacidad',
-    example: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  esDiscapacitado?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Porcentaje de discapacidad (si aplica)',
-    example: 30.5,
-  })
-  @IsOptional()
-  @IsNumber()
-  porcentajeDiscapacidad?: number;
-}
+import { CreateClienteDto } from 'src/modules/clientes/dto';
 
 export class RegistroClienteDto {
   @ApiProperty({
@@ -108,10 +29,10 @@ export class RegistroClienteDto {
 
   @ApiProperty({
     description: 'Datos del cliente',
-    type: ClienteDto,
+    type: CreateClienteDto,
   })
   @IsNotEmpty({ message: 'Los datos del cliente son requeridos' })
-  @ValidateNested({ each: true })
-  @Type(() => ClienteDto)
-  cliente: ClienteDto;
+  @ValidateNested()
+  @Type(() => CreateClienteDto)
+  cliente: CreateClienteDto;
 }

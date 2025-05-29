@@ -4,22 +4,62 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Usuario, TipoUsuario } from '@prisma/client';
+import { Prisma, Usuario, TipoUsuario } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { CrearUsuarioDto, ActualizarUsuarioDto, PerfilUsuarioDto } from './dto';
+import {
+  USUARIO_SELECT,
+  USUARIO_SELECT_WITH_RELATIONS,
+} from './constants/usuario-select';
 
 @Injectable()
 export class UsuariosService {
   constructor(private prisma: PrismaService) {}
 
-  async crearUsuario(
-    email: string,
-    password: string,
-    tipoUsuario: TipoUsuario = TipoUsuario.CLIENTE,
-  ): Promise<Usuario> {
-    const passwordHash = await this.hashPassword(password);
+  async obtenerUsuarios(
+    filtro: Prisma.UsuarioWhereInput,
+    args: Prisma.UsuarioSelect = USUARIO_SELECT_WITH_RELATIONS,
+  ) {
+    return await this.prisma.usuario.findMany({
+      where: filtro,
+      orderBy: { email: 'asc' },
+      select: args,
+    });
+  }
 
-    return this.prisma.usuario.create({
+  async obtenerUsuario(
+    filtro: Prisma.UsuarioWhereUniqueInput,
+    tx?: Prisma.TransactionClient,
+    args: Prisma.UsuarioSelect = USUARIO_SELECT_WITH_RELATIONS,
+  ) {
+    const usuario = await (tx || this.prisma).usuario.findUnique({
+      where: filtro,
+      select: args,
+    });
+
+    if (!usuario) {
+      throw new NotFoundException(
+        `Usuario con el filtro ${JSON.stringify(filtro)} no encontrado`,
+      );
+    }
+
+    return usuario;
+  }
+
+  async crearUsuario(
+    crearUsuarioDto: CrearUsuarioDto,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Usuario> {
+    const { email, password, tipoUsuario } = crearUsuarioDto;
+    const passwordHash = await this.hashPassword(password);
+    const usuarioExistente = await this.prisma.usuario.findUnique({
+      where: { email },
+    });
+    if (usuarioExistente) {
+      throw new ConflictException(`Ya existe un usuario con el email ${email}`);
+    }
+
+    return await (tx || this.prisma).usuario.create({
       data: {
         email,
         passwordHash,
@@ -27,81 +67,52 @@ export class UsuariosService {
         fechaRegistro: new Date(),
         activo: true,
       },
+      select: USUARIO_SELECT_WITH_RELATIONS,
     });
-  }
-
-  async crearUsuarioCompleto(
-    crearUsuarioDto: CrearUsuarioDto,
-  ): Promise<PerfilUsuarioDto> {
-    const usuarioExistente = await this.buscarPorEmail(crearUsuarioDto.email);
-    if (usuarioExistente) {
-      throw new ConflictException(
-        `Ya existe un usuario con el email ${crearUsuarioDto.email}`,
-      );
-    }
-
-    const usuario = await this.crearUsuario(
-      crearUsuarioDto.email,
-      crearUsuarioDto.password,
-      crearUsuarioDto.tipoUsuario || TipoUsuario.CLIENTE,
-    );
-
-    return {
-      id: usuario.id,
-      email: usuario.email,
-      tipoUsuario: usuario.tipoUsuario,
-      fechaRegistro: usuario.fechaRegistro,
-      ultimoAcceso: usuario.ultimoAcceso,
-      activo: usuario.activo,
-      tenant: null,
-      roles: null,
-    };
   }
 
   async actualizarUsuario(
     id: number,
     actualizarUsuarioDto: ActualizarUsuarioDto,
+    tx?: Prisma.TransactionClient,
   ): Promise<PerfilUsuarioDto> {
-    const usuarioExistente = await this.buscarPorId(id);
-    if (!usuarioExistente) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    const usuarioExistente = await this.obtenerUsuario({ id });
+
+    if (
+      actualizarUsuarioDto.email &&
+      actualizarUsuarioDto.email !== usuarioExistente.email
+    ) {
+      const existente = await this.prisma.usuario.findUnique({
+        where: { email: actualizarUsuarioDto.email, NOT: { id: id } },
+      });
+
+      if (existente) {
+        throw new ConflictException(
+          `Ya existe un usuario con el email ${actualizarUsuarioDto.email}`,
+        );
+      }
     }
-
-    const datosActualizacion: any = { ...actualizarUsuarioDto };
-
-    if (actualizarUsuarioDto.password) {
-      datosActualizacion.passwordHash = await this.hashPassword(
-        actualizarUsuarioDto.password,
-      );
-      delete datosActualizacion.password;
-    }
-
-    const usuarioActualizado = await this.prisma.usuario.update({
+    return await (tx || this.prisma).usuario.update({
       where: { id },
-      data: datosActualizacion,
-    });
-
-    return {
-      id: usuarioActualizado.id,
-      email: usuarioActualizado.email,
-      tipoUsuario: usuarioActualizado.tipoUsuario,
-      fechaRegistro: usuarioActualizado.fechaRegistro,
-      ultimoAcceso: usuarioActualizado.ultimoAcceso,
-      activo: usuarioActualizado.activo,
-      tenant: null,
-      roles: null,
-    };
-  }
-
-  async buscarPorEmail(email: string): Promise<Usuario | null> {
-    return await this.prisma.usuario.findUnique({
-      where: { email },
+      data: {
+        email: actualizarUsuarioDto.email,
+        tipoUsuario: actualizarUsuarioDto.tipoUsuario,
+        activo: actualizarUsuarioDto.activo,
+        passwordHash: actualizarUsuarioDto.password
+          ? await this.hashPassword(actualizarUsuarioDto.password)
+          : undefined,
+      },
+      select: USUARIO_SELECT_WITH_RELATIONS,
     });
   }
 
-  async buscarPorId(id: number): Promise<Usuario | null> {
-    return await this.prisma.usuario.findUnique({
+  async desactivarUsuario(id: number, tx?: Prisma.TransactionClient) {
+    await this.obtenerUsuario({ id });
+
+    return await (tx || this.prisma).usuario.update({
       where: { id },
+      data: { activo: false },
+      select: USUARIO_SELECT_WITH_RELATIONS,
     });
   }
 
@@ -109,7 +120,13 @@ export class UsuariosService {
     email: string,
     password: string,
   ): Promise<Usuario | null> {
-    const usuario = await this.buscarPorEmail(email);
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { email },
+      select: {
+        ...USUARIO_SELECT_WITH_RELATIONS,
+        passwordHash: true,
+      },
+    });
     if (!usuario) return null;
 
     const passwordValida = await this.validarPassword(
@@ -119,15 +136,6 @@ export class UsuariosService {
     if (!passwordValida) return null;
 
     return usuario;
-  }
-
-  async obtenerTenantsDeUsuario(usuarioId: number) {
-    return await this.prisma.usuarioTenant.findMany({
-      where: { usuarioId, activo: true },
-      include: {
-        tenant: true,
-      },
-    });
   }
 
   private async hashPassword(password: string): Promise<string> {

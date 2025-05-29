@@ -70,7 +70,7 @@ model Cliente {
   fechaNacimiento        DateTime?
   esDiscapacitado        Boolean       @default(false)
   porcentajeDiscapacidad Decimal?      @db.Decimal(5, 2)
-  usuarioId              Int?          @unique // Vínculo opcional a Usuario
+  usuarioId              Int?          @unique
   fechaRegistro          DateTime      @default(now())
   ultimaActualizacion    DateTime      @default(now())
   activo                 Boolean       @default(true)

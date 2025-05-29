@@ -13,8 +13,8 @@ export class CreateTenantDto {
     description: 'Nombre de la cooperativa de transporte',
     example: 'Cooperativa Esmeraldas',
   })
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'El nombre debe ser una cadena de caracteres' })
+  @IsNotEmpty({ message: 'El nombre es requerido' })
   nombre: string;
 
   @ApiProperty({
@@ -22,8 +22,8 @@ export class CreateTenantDto {
       'Identificador único para la cooperativa (usado en URL y subdominios)',
     example: 'esmeraldas-coop',
   })
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'El identificador debe ser una cadena de caracteres' })
+  @IsNotEmpty({ message: 'El identificador es requerido' })
   @Matches(/^[a-z0-9-]+$/, {
     message:
       'El identificador solo puede contener letras minúsculas, números y guiones',
@@ -35,7 +35,7 @@ export class CreateTenantDto {
     example: 'https://example.com/logo.png',
   })
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'La URL del logo debe ser una URL válida' })
   logoUrl?: string;
 
   @ApiPropertyOptional({
@@ -43,7 +43,7 @@ export class CreateTenantDto {
     example: '#1E90FF',
   })
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'El color debe ser una cadena de caracteres' })
   @Matches(/^#[0-9A-Fa-f]{6}$/, {
     message: 'El color debe ser un código hexadecimal válido (ej: #1E90FF)',
   })
@@ -54,7 +54,7 @@ export class CreateTenantDto {
     example: '#FFD700',
   })
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'El color debe ser una cadena de caracteres' })
   @Matches(/^#[0-9A-Fa-f]{6}$/, {
     message: 'El color debe ser un código hexadecimal válido (ej: #FFD700)',
   })
@@ -65,7 +65,7 @@ export class CreateTenantDto {
     example: 'https://www.cooperativa-esmeraldas.com',
   })
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'El sitio web debe ser una URL válida' })
   sitioWeb?: string;
 
   @ApiPropertyOptional({
@@ -73,7 +73,10 @@ export class CreateTenantDto {
     example: 'info@cooperativa-esmeraldas.com',
   })
   @IsOptional()
-  @IsEmail()
+  @IsEmail(
+    {},
+    { message: 'El email de contacto debe ser una dirección de correo válida' },
+  )
   emailContacto?: string;
 
   @ApiPropertyOptional({
@@ -81,6 +84,6 @@ export class CreateTenantDto {
     example: '+593987654321',
   })
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'El teléfono debe ser una cadena de caracteres' })
   telefono?: string;
 }

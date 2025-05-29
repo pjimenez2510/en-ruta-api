@@ -1,14 +1,18 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsuariosService } from '../usuarios/usuarios.service';
-import { Usuario, TipoUsuario, RolUsuario } from '@prisma/client';
+import { Usuario, TipoUsuario, RolUsuario, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, RegistroClienteDto, RegistroCooperativaDto } from './dto';
+import { ClientesService } from '../clientes/clientes.service';
+import { TenantsService } from '../tenants/tenants.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usuariosService: UsuariosService,
+    private clientesService: ClientesService,
+    private tenantsService: TenantsService,
     private jwtService: JwtService,
     private prisma: PrismaService,
   ) {}
@@ -25,61 +29,71 @@ export class AuthService {
   }
 
   async login(usuario: Usuario) {
-    const payload = await this.crearPayload(usuario);
+    const { passwordHash, ...usuarioWithoutPassword } = usuario;
     return {
-      accessToken: this.jwtService.sign(payload),
-      usuario: {
-        id: usuario.id,
-        email: usuario.email,
-        tipoUsuario: usuario.tipoUsuario,
-        tenant: payload.tenant,
-        roles: payload.roles,
-      },
+      accessToken: this.jwtService.sign(usuarioWithoutPassword),
+      usuario: usuarioWithoutPassword,
     };
   }
 
   async registrarCliente(registroClienteDto: RegistroClienteDto) {
     const { email, password, cliente } = registroClienteDto;
 
-    const usuario = await this.usuariosService.crearUsuario(
-      email,
-      password,
-      TipoUsuario.CLIENTE,
-    );
+    return this.prisma.$transaction(async (tx) => {
+      const usuario = await this.usuariosService.crearUsuario(
+        {
+          email,
+          password,
+          tipoUsuario: TipoUsuario.CLIENTE,
+        },
+        tx,
+      );
 
-    await this.prisma.cliente.create({
-      data: {
-        ...cliente,
-      },
+      await this.clientesService.crearCliente(cliente, tx, usuario.id);
+
+      const usuarioTenant = await this.usuariosService.obtenerUsuario(
+        {
+          id: usuario.id,
+        },
+        tx,
+      );
+
+      return this.login(usuarioTenant);
     });
-
-    return this.login(usuario);
   }
 
   async registrarUsuarioConTenant(registroUsuarioDto: RegistroCooperativaDto) {
     const { email, password, tenant } = registroUsuarioDto;
 
-    const usuario = await this.usuariosService.crearUsuario(
-      email,
-      password,
-      TipoUsuario.PERSONAL_COOPERATIVA,
-    );
+    return this.prisma.$transaction(async (tx) => {
+      const usuario = await this.usuariosService.crearUsuario(
+        {
+          email,
+          password,
+          tipoUsuario: TipoUsuario.PERSONAL_COOPERATIVA,
+        },
+        tx,
+      );
 
-    const tenantNew = await this.prisma.tenant.create({
-      data: {
-        ...tenant,
-      },
+      const tenantNew = await this.tenantsService.crearTenant(tenant, tx);
+
+      await tx.usuarioTenant.create({
+        data: {
+          usuarioId: usuario.id,
+          tenantId: tenantNew.id,
+          rol: RolUsuario.ADMIN_COOPERATIVA,
+        },
+      });
+
+      const usuarioTenant = await this.usuariosService.obtenerUsuario(
+        {
+          id: usuario.id,
+        },
+        tx,
+      );
+
+      return this.login(usuarioTenant);
     });
-
-    await this.prisma.usuarioTenant.create({
-      data: {
-        usuarioId: usuario.id,
-        tenantId: tenantNew.id,
-        rol: RolUsuario.ADMIN_COOPERATIVA,
-      },
-    });
-
-    return this.login(usuario);
   }
 
   async cambiarTenant(usuarioId: number, tenantId: number) {
@@ -95,49 +109,9 @@ export class AuthService {
       throw new UnauthorizedException('No tienes acceso a este tenant');
     }
 
-    const usuario = await this.usuariosService.buscarPorId(usuarioId);
-    return this.login(usuario);
-  }
-
-  private async crearPayload(usuario: Usuario) {
-    const payload: any = {
-      sub: usuario.id,
-      email: usuario.email,
-      tipoUsuario: usuario.tipoUsuario,
-    };
-
-    if (usuario.tipoUsuario === TipoUsuario.CLIENTE) {
-      return payload;
-    }
-
-    const usuarioTenant = await this.prisma.usuarioTenant.findFirst({
-      where: {
-        usuarioId: usuario.id,
-        activo: true,
-      },
-      include: {
-        tenant: {
-          select: {
-            id: true,
-            nombre: true,
-            identificador: true,
-          },
-        },
-      },
+    const usuario = await this.usuariosService.obtenerUsuario({
+      id: usuarioId,
     });
-
-    if (!usuarioTenant) {
-      return payload;
-    }
-
-    payload.tenant = {
-      id: usuarioTenant.tenant.id,
-      nombre: usuarioTenant.tenant.nombre,
-      identificador: usuarioTenant.tenant.identificador,
-    };
-
-    payload.roles = [usuarioTenant.rol];
-
-    return payload;
+    return this.login(usuario);
   }
 }

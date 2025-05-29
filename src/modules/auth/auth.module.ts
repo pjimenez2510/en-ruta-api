@@ -8,10 +8,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 import { TenantsModule } from '../tenants/tenants.module';
+import { ClientesModule } from '../clientes/clientes.module';
+import { UsuarioTenantModule } from '../usuario-tenant/usuario-tenant.module';
 
 @Module({
   imports: [
     UsuariosModule,
+    ClientesModule,
+    UsuarioTenantModule,
     TenantsModule,
     PassportModule,
     JwtModule.registerAsync({

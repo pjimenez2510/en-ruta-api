@@ -1,11 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsBoolean } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
-import { CreateTenantDto } from './create-tenant.dto';
+import { CreateClienteDto } from './create-cliente.dto';
 
-export class UpdateTenantDto extends PartialType(CreateTenantDto) {
+export class UpdateClienteDto extends PartialType(CreateClienteDto) {
   @ApiPropertyOptional({
-    description: 'Estado activo del tenant',
+    description: 'Estado activo del cliente',
     example: true,
   })
   @IsOptional()

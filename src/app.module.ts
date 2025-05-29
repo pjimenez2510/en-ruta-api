@@ -8,6 +8,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TenantContextMiddleware } from './common/middleware/tenant-context.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { TenantContextModule } from './modules/tenant-context/tenant-context.module';
+import { ConfiguracionesTenantModule } from './modules/configuraciones-tenant/configuraciones-tenant.module';
+import { ClientesModule } from './modules/clientes/clientes.module';
+import { UsuarioTenantModule } from './modules/usuario-tenant/usuario-tenant.module';
 
 @Module({
   imports: [
@@ -19,6 +22,9 @@ import { TenantContextModule } from './modules/tenant-context/tenant-context.mod
     UsuariosModule,
     AuthModule,
     TenantContextModule,
+    ConfiguracionesTenantModule,
+    ClientesModule,
+    UsuarioTenantModule,
   ],
   controllers: [AppController],
   providers: [AppService],

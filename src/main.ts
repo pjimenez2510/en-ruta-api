@@ -23,10 +23,15 @@ async function bootstrap() {
     .setTitle('API de EnRuta')
     .setDescription('API para el sistema de cooperativas de transporte EnRuta')
     .setVersion('1.0')
-    .addTag('auth', 'Autenticación y autorización')
-    .addTag('tenants', 'Gestión de cooperativas')
-    .addTag('usuarios', 'Gestión de usuarios')
-    .addBearerAuth()
+    .addServer(`http://localhost:${process.env.PORT ?? 3000}`, 'Servidor local')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'JWT',
+      description: 'Enter your JWT token',
+      in: 'header',
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
