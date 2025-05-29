@@ -11,6 +11,7 @@ import { TenantContextModule } from './modules/tenant-context/tenant-context.mod
 import { ConfiguracionesTenantModule } from './modules/configuraciones-tenant/configuraciones-tenant.module';
 import { ClientesModule } from './modules/clientes/clientes.module';
 import { UsuarioTenantModule } from './modules/usuario-tenant/usuario-tenant.module';
+import { TipoAsientosModule } from './modules/tipo-asientos/tipo-asientos.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UsuarioTenantModule } from './modules/usuario-tenant/usuario-tenant.mod
     ConfiguracionesTenantModule,
     ClientesModule,
     UsuarioTenantModule,
+    TipoAsientosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
