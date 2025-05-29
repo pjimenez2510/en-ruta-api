@@ -110,12 +110,4 @@ export class CreateClienteDto {
   })
   @IsOptional()
   porcentajeDiscapacidad?: number;
-
-  @ApiPropertyOptional({
-    description: 'ID del usuario asociado (si existe)',
-    example: 1,
-  })
-  @IsInt({ message: 'El ID del usuario debe ser un número entero' })
-  @IsOptional()
-  usuarioId?: number;
 }

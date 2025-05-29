@@ -5,12 +5,12 @@ import { TipoUsuario } from '@prisma/client';
 
 export class FiltroUsuarioDto {
   @ApiProperty({
-    description: 'Filtrar por email',
+    description: 'Filtrar por username',
     required: false,
   })
-  @IsString({ message: 'El email debe ser una cadena de caracteres' })
+  @IsString({ message: 'El username debe ser una cadena de caracteres' })
   @IsOptional()
-  email?: string;
+  username?: string;
 
   @ApiProperty({
     description: 'Filtrar por tipo de usuario',

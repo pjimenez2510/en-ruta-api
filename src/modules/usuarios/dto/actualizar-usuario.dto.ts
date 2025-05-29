@@ -10,12 +10,12 @@ import { TipoUsuario } from '@prisma/client';
 
 export class ActualizarUsuarioDto {
   @ApiPropertyOptional({
-    description: 'Email del usuario',
-    example: 'usuario@ejemplo.com',
+    description: 'Username del usuario',
+    example: 'usuario',
   })
-  @IsEmail({}, { message: 'El email debe tener un formato válido' })
+  @IsString({ message: 'El username debe ser un texto' })
   @IsOptional()
-  email?: string;
+  username?: string;
 
   @ApiPropertyOptional({
     description: 'Contraseña del usuario',

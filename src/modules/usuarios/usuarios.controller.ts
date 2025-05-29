@@ -66,9 +66,7 @@ export class UsuariosController {
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async crearUsuario(
-    @Body() crearUsuarioDto: CrearUsuarioDto,
-  ): Promise<PerfilUsuarioDto> {
+  async crearUsuario(@Body() crearUsuarioDto: CrearUsuarioDto) {
     return this.usuariosService.crearUsuario(crearUsuarioDto);
   }
 

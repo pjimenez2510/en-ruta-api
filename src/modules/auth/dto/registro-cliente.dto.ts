@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
-  IsEmail,
   IsNotEmpty,
   IsString,
   MinLength,
@@ -11,12 +10,12 @@ import { CreateClienteDto } from 'src/modules/clientes/dto';
 
 export class RegistroClienteDto {
   @ApiProperty({
-    description: 'Email para la cuenta de usuario',
-    example: 'cliente@ejemplo.com',
+    description: 'Username para la cuenta de usuario',
+    example: 'cliente',
   })
-  @IsEmail({}, { message: 'El email debe ser un formato válido' })
-  @IsNotEmpty({ message: 'El email es requerido' })
-  email: string;
+  @IsString({ message: 'El username debe ser un texto' })
+  @IsNotEmpty({ message: 'El username es requerido' })
+  username: string;
 
   @ApiProperty({
     description: 'Contraseña para la cuenta',

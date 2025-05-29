@@ -17,9 +17,9 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
-  async validarUsuario(email: string, password: string): Promise<any> {
+  async validarUsuario(username: string, password: string): Promise<any> {
     const usuario = await this.usuariosService.validarCredenciales(
-      email,
+      username,
       password,
     );
     if (!usuario) {
@@ -37,12 +37,12 @@ export class AuthService {
   }
 
   async registrarCliente(registroClienteDto: RegistroClienteDto) {
-    const { email, password, cliente } = registroClienteDto;
+    const { username, password, cliente } = registroClienteDto;
 
     return this.prisma.$transaction(async (tx) => {
       const usuario = await this.usuariosService.crearUsuario(
         {
-          email,
+          username,
           password,
           tipoUsuario: TipoUsuario.CLIENTE,
         },
@@ -63,12 +63,12 @@ export class AuthService {
   }
 
   async registrarUsuarioConTenant(registroUsuarioDto: RegistroCooperativaDto) {
-    const { email, password, tenant } = registroUsuarioDto;
+    const { username, password, tenant } = registroUsuarioDto;
 
     return this.prisma.$transaction(async (tx) => {
       const usuario = await this.usuariosService.crearUsuario(
         {
-          email,
+          username,
           password,
           tipoUsuario: TipoUsuario.PERSONAL_COOPERATIVA,
         },

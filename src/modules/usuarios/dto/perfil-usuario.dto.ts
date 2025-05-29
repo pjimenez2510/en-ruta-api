@@ -20,10 +20,10 @@ export class PerfilUsuarioDto {
   id: number;
 
   @ApiProperty({
-    description: 'Email del usuario',
-    example: 'usuario@ejemplo.com',
+    description: 'Username del usuario',
+    example: 'usuario',
   })
-  email: string;
+  username: string;
 
   @ApiProperty({
     description: 'Tipo de usuario',

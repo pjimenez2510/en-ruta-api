@@ -22,7 +22,7 @@ export class UsuariosService {
   ) {
     return await this.prisma.usuario.findMany({
       where: filtro,
-      orderBy: { email: 'asc' },
+      orderBy: { username: 'asc' },
       select: args,
     });
   }
@@ -50,18 +50,20 @@ export class UsuariosService {
     crearUsuarioDto: CrearUsuarioDto,
     tx?: Prisma.TransactionClient,
   ): Promise<Usuario> {
-    const { email, password, tipoUsuario } = crearUsuarioDto;
+    const { username, password, tipoUsuario } = crearUsuarioDto;
     const passwordHash = await this.hashPassword(password);
     const usuarioExistente = await this.prisma.usuario.findUnique({
-      where: { email },
+      where: { username },
     });
     if (usuarioExistente) {
-      throw new ConflictException(`Ya existe un usuario con el email ${email}`);
+      throw new ConflictException(
+        `Ya existe un usuario con el username ${username}`,
+      );
     }
 
     return await (tx || this.prisma).usuario.create({
       data: {
-        email,
+        username,
         passwordHash,
         tipoUsuario,
         fechaRegistro: new Date(),
@@ -79,25 +81,26 @@ export class UsuariosService {
     const usuarioExistente = await this.obtenerUsuario({ id });
 
     if (
-      actualizarUsuarioDto.email &&
-      actualizarUsuarioDto.email !== usuarioExistente.email
+      actualizarUsuarioDto.username &&
+      actualizarUsuarioDto.username !== usuarioExistente.username
     ) {
       const existente = await this.prisma.usuario.findUnique({
-        where: { email: actualizarUsuarioDto.email, NOT: { id: id } },
+        where: { username: actualizarUsuarioDto.username, NOT: { id: id } },
       });
 
       if (existente) {
         throw new ConflictException(
-          `Ya existe un usuario con el email ${actualizarUsuarioDto.email}`,
+          `Ya existe un usuario con el username ${actualizarUsuarioDto.username}`,
         );
       }
     }
     return await (tx || this.prisma).usuario.update({
       where: { id },
       data: {
-        email: actualizarUsuarioDto.email,
+        username: actualizarUsuarioDto.username,
         tipoUsuario: actualizarUsuarioDto.tipoUsuario,
         activo: actualizarUsuarioDto.activo,
+
         passwordHash: actualizarUsuarioDto.password
           ? await this.hashPassword(actualizarUsuarioDto.password)
           : undefined,
@@ -117,11 +120,11 @@ export class UsuariosService {
   }
 
   async validarCredenciales(
-    email: string,
+    username: string,
     password: string,
   ): Promise<Usuario | null> {
     const usuario = await this.prisma.usuario.findUnique({
-      where: { email },
+      where: { username },
       select: {
         ...USUARIO_SELECT_WITH_RELATIONS,
         passwordHash: true,

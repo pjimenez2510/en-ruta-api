@@ -6,10 +6,10 @@ export const filtroUsuarioBuild = (
 ): Prisma.UsuarioWhereInput => {
   const where: Prisma.UsuarioWhereInput = {};
 
-  const { email, tipoUsuario, activo } = filtro;
+  const { username, tipoUsuario, activo } = filtro;
 
-  if (email) {
-    where.email = { contains: email };
+  if (username) {
+    where.username = { contains: username };
   }
 
   if (tipoUsuario) {

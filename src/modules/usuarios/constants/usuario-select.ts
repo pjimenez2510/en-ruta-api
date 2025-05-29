@@ -4,7 +4,7 @@ import { USUARIO_TENANT_SELECT } from 'src/modules/usuario-tenant/constants/usua
 
 export const USUARIO_SELECT: Prisma.UsuarioSelect = {
   id: true,
-  email: true,
+  username: true,
   tipoUsuario: true,
   fechaRegistro: true,
   ultimoAcceso: true,

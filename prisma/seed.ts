@@ -5,13 +5,13 @@ const prisma = new PrismaClient();
 async function main() {
   const user = await prisma.usuario.upsert({
     where: {
-      email: 'admin@admin.com',
+      username: 'admin',
     },
     update: {
       passwordHash: bcrypt.hashSync('admin', 10),
     },
     create: {
-      email: 'admin@admin.com',
+      username: 'admin',
       passwordHash: bcrypt.hashSync('admin', 10),
       tipoUsuario: TipoUsuario.ADMIN_SISTEMA,
     },

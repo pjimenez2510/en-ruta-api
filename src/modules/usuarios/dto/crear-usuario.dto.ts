@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -11,12 +10,12 @@ import { TipoUsuario } from '@prisma/client';
 
 export class CrearUsuarioDto {
   @ApiProperty({
-    description: 'Email del usuario',
-    example: 'usuario@ejemplo.com',
+    description: 'Username del usuario',
+    example: 'usuario',
   })
-  @IsEmail({}, { message: 'El email debe tener un formato válido' })
-  @IsNotEmpty({ message: 'El email es requerido' })
-  email: string;
+  @IsString({ message: 'El username debe ser un texto' })
+  @IsNotEmpty({ message: 'El username es requerido' })
+  username: string;
 
   @ApiProperty({
     description: 'Contraseña del usuario',

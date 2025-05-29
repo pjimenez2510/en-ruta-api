@@ -9,12 +9,12 @@ import {
 
 export class LoginDto {
   @ApiProperty({
-    description: 'Email del usuario',
-    example: 'admin@admin.com',
+    description: 'Username del usuario',
+    example: 'admin',
   })
-  @IsEmail({}, { message: 'El email debe ser un formato válido' })
-  @IsNotEmpty({ message: 'El email es requerido' })
-  email: string;
+  @IsString({ message: 'El username debe ser un texto' })
+  @IsNotEmpty({ message: 'El username es requerido' })
+  username: string;
 
   @ApiProperty({
     description: 'Contraseña del usuario',
