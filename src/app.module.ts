@@ -12,6 +12,7 @@ import { ConfiguracionesTenantModule } from './modules/configuraciones-tenant/co
 import { ClientesModule } from './modules/clientes/clientes.module';
 import { UsuarioTenantModule } from './modules/usuario-tenant/usuario-tenant.module';
 import { TipoAsientosModule } from './modules/tipo-asientos/tipo-asientos.module';
+import { ModelosBusModule } from './modules/modelos-bus/modelos-bus.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TipoAsientosModule } from './modules/tipo-asientos/tipo-asientos.module
     ClientesModule,
     UsuarioTenantModule,
     TipoAsientosModule,
+    ModelosBusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
