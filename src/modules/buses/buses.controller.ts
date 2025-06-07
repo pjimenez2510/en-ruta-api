@@ -17,7 +17,6 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario, EstadoBus } from '@prisma/client';
-import { RequireTenant } from '../../common/decorators/require-tenant.decorator';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { CreateBusDto, UpdateBusDto, FiltroBusDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
@@ -33,7 +32,6 @@ export class BusesController {
     summary: 'Obtener todos los buses de la cooperativa actual',
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireTenant()
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
@@ -88,7 +86,6 @@ export class BusesController {
     summary: 'Obtener bus por ID de la cooperativa actual',
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireTenant()
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
@@ -110,7 +107,6 @@ export class BusesController {
 
   @ApiOperation({ summary: 'Crear nuevo bus' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireTenant()
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -124,7 +120,6 @@ export class BusesController {
 
   @ApiOperation({ summary: 'Actualizar bus' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireTenant()
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
   async actualizarBus(
@@ -148,7 +143,6 @@ export class BusesController {
 
   @ApiOperation({ summary: 'Cambiar estado del bus a MANTENIMIENTO' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireTenant()
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/mantenimiento')
   async enviarAMantenimiento(
@@ -169,7 +163,6 @@ export class BusesController {
 
   @ApiOperation({ summary: 'Cambiar estado del bus a ACTIVO' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireTenant()
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/activar')
   async activarBus(
@@ -190,7 +183,6 @@ export class BusesController {
 
   @ApiOperation({ summary: 'Cambiar estado del bus a RETIRADO' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequireTenant()
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/retirar')
   async retirarBus(

@@ -3,10 +3,11 @@ import { FiltroTipoAsientoDto } from '../dto/filtro-tipo-asiento.dto';
 
 export const filtroTipoAsientoBuild = (
   filtro: FiltroTipoAsientoDto,
+  tenantId?: number,
 ): Prisma.TipoAsientoWhereInput => {
   const where: Prisma.TipoAsientoWhereInput = {};
 
-  const { nombre, descripcion, color, icono, activo, tenantId } = filtro;
+  const { nombre, descripcion, color, icono, activo } = filtro;
 
   if (nombre) {
     where.nombre = { contains: nombre, mode: 'insensitive' };
@@ -28,7 +29,7 @@ export const filtroTipoAsientoBuild = (
     where.activo = activo;
   }
 
-  if (tenantId !== undefined) {
+  if (tenantId) {
     where.tenantId = tenantId;
   }
 

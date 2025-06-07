@@ -99,8 +99,39 @@ model UsuarioTenant {
   hojasTrabajoConductor HojaTrabajo[] @relation("HojasConductor")
   hojaTrabajoAyudante   HojaTrabajo[] @relation("HojasAyudante")
 
+  // Relación con información personal
+  infoPersonal PersonalCooperativa?
+
   @@unique([usuarioId, tenantId, rol])
   @@map("usuarios_tenants")
+}
+
+// Nuevo modelo para información personal de usuarios con roles en cooperativas
+model PersonalCooperativa {
+  id                     Int           @id @default(autoincrement())
+  usuarioTenantId        Int           @unique
+  nombres                String
+  apellidos              String
+  tipoDocumento          TipoDocumento @default(CEDULA)
+  numeroDocumento        String
+  telefono               String?
+  email                  String?
+  fechaNacimiento        DateTime?
+  direccion              String?
+  ciudadResidencia       String?
+  genero                 String?
+  fotoPerfil             String?
+  licenciaConducir       String?       // Para conductores
+  tipoLicencia           String?       // Para conductores
+  fechaExpiracionLicencia DateTime?    // Para conductores
+  fechaContratacion      DateTime?
+  fechaRegistro          DateTime      @default(now())
+  ultimaActualizacion    DateTime      @default(now())
+  activo                 Boolean       @default(true)
+
+  // Relación con UsuarioTenant
+  usuarioTenant UsuarioTenant @relation(fields: [usuarioTenantId], references: [id], onDelete: Cascade)
+  @@map("personal_cooperativa")
 }
 
 model Ciudad {

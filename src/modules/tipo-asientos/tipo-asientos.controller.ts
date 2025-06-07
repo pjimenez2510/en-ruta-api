@@ -16,8 +16,7 @@ import { TipoAsientosService } from './tipo-asientos.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { TipoUsuario, RolUsuario } from '@prisma/client';
-import { RequireTenant } from '../../common/decorators/require-tenant.decorator';
+import { RolUsuario, TipoUsuario } from '@prisma/client';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import {
   CreateTipoAsientoDto,
@@ -31,7 +30,6 @@ import { filtroTipoAsientoBuild } from './utils/filtro-tipo-asiento-build';
 @ApiBearerAuth()
 @Controller('tipo-asientos')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@RequireTenant()
 export class TipoAsientosController {
   constructor(private readonly tipoAsientosService: TipoAsientosService) {}
 
@@ -42,11 +40,8 @@ export class TipoAsientosController {
     @Query() filtro: FiltroTipoAsientoDto,
     @TenantActual() tenant,
   ) {
-    // Asegurar que solo se devuelvan tipos de asiento del tenant actual
-    filtro.tenantId = tenant.id;
-
     const tiposAsiento = await this.tipoAsientosService.obtenerTiposAsiento(
-      filtroTipoAsientoBuild(filtro),
+      filtroTipoAsientoBuild(filtro, tenant.id),
     );
     return tiposAsiento;
   }
@@ -60,7 +55,7 @@ export class TipoAsientosController {
   ) {
     const tipoAsiento = await this.tipoAsientosService.obtenerTipoAsiento({
       id,
-      tenantId: tenant.id, // Asegurar que pertenezca al tenant actual
+      tenantId: tenant.id,
     });
     return tipoAsiento;
   }
@@ -73,7 +68,6 @@ export class TipoAsientosController {
     @Body() createTipoAsientoDto: CreateTipoAsientoDto,
     @TenantActual() tenant,
   ) {
-    // Asegurar que el tipo de asiento se cree para el tenant actual
     createTipoAsientoDto.tenantId = tenant.id;
 
     const tipoAsiento =
@@ -89,7 +83,6 @@ export class TipoAsientosController {
     @Body() updateTipoAsientoDto: UpdateTipoAsientoDto,
     @TenantActual() tenant,
   ) {
-    // Asegurar que el tipo de asiento pertenezca al tenant actual
     await this.tipoAsientosService.obtenerTipoAsiento({
       id,
       tenantId: tenant.id,
@@ -109,7 +102,6 @@ export class TipoAsientosController {
     @Param('id', ParseIntPipe) id: number,
     @TenantActual() tenant,
   ) {
-    // Asegurar que el tipo de asiento pertenezca al tenant actual
     await this.tipoAsientosService.obtenerTipoAsiento({
       id,
       tenantId: tenant.id,

@@ -1,30 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsNotEmpty,
-  IsInt,
-  IsEnum,
   IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
   IsOptional,
+  ValidateNested,
 } from 'class-validator';
+import { CrearUsuarioSinTipoDto } from './create-usuario-sin-tipo.dto';
+import { Type } from 'class-transformer';
+import { CreatePersonalCooperativaDto } from 'src/modules/personal-cooperativa/dto';
 import { RolUsuario } from '@prisma/client';
 
 export class CreateUsuarioTenantDto {
-  @ApiProperty({
-    description: 'ID del usuario a asignar al tenant',
-    example: 1,
-  })
-  @IsInt({ message: 'El ID del usuario debe ser un número entero' })
-  @IsNotEmpty({ message: 'El ID del usuario es requerido' })
-  usuarioId: number;
-
-  @ApiProperty({
-    description: 'ID del tenant al que se asignará el usuario',
-    example: 1,
-  })
-  @IsInt({ message: 'El ID del tenant debe ser un número entero' })
-  @IsNotEmpty({ message: 'El ID del tenant es requerido' })
-  tenantId: number;
-
   @ApiProperty({
     description: 'Rol que tendrá el usuario en el tenant',
     enum: RolUsuario,
@@ -37,11 +25,23 @@ export class CreateUsuarioTenantDto {
   rol: RolUsuario;
 
   @ApiProperty({
-    description: 'Estado activo de la relación usuario-tenant',
-    example: true,
-    default: true,
+    description:
+      'Datos del usuario a crear (sin tipo, será PERSONAL_COOPERATIVA automáticamente)',
+    type: () => CrearUsuarioSinTipoDto,
   })
-  @IsBoolean({ message: 'El estado activo debe ser un booleano' })
-  @IsOptional()
-  activo?: boolean;
+  @IsObject({ message: 'Los datos del usuario deben ser un objeto válido' })
+  @ValidateNested()
+  @Type(() => CrearUsuarioSinTipoDto)
+  usuario: CrearUsuarioSinTipoDto;
+
+  @ApiProperty({
+    description: 'Datos personales del usuario en la cooperativa',
+    type: () => CreatePersonalCooperativaDto,
+  })
+  @IsObject({ message: 'Los datos personales deben ser un objeto válido' })
+  @ValidateNested()
+  @Type(() => CreatePersonalCooperativaDto)
+  infoPersonal: CreatePersonalCooperativaDto;
+
+  tenantId: number;
 }

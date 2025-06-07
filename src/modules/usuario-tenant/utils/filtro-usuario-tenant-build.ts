@@ -3,10 +3,11 @@ import { FiltroUsuarioTenantDto } from '../dto/filtro-usuario-tenant.dto';
 
 export const filtroUsuarioTenantBuild = (
   filtro: FiltroUsuarioTenantDto,
+  tenantId?: number,
 ): Prisma.UsuarioTenantWhereInput => {
   const where: Prisma.UsuarioTenantWhereInput = {};
 
-  const { usuarioId, tenantId, rol, activo } = filtro;
+  const { usuarioId, rol, activo } = filtro;
 
   if (usuarioId !== undefined) {
     where.usuarioId = usuarioId;
