@@ -11,6 +11,7 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaClientExceptionFilter());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
+  app.enableShutdownHooks();
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
