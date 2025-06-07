@@ -47,13 +47,4 @@ export class FiltroTipoAsientoDto {
     return undefined;
   })
   activo?: boolean = true;
-
-  @ApiProperty({
-    description: 'Filtrar por ID de tenant',
-    required: false,
-  })
-  @IsNumber({}, { message: 'El ID del tenant debe ser un número' })
-  @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value) : undefined))
-  tenantId?: number;
 }

@@ -1,13 +1,20 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsBoolean, IsEnum } from 'class-validator';
-import { PartialType } from '@nestjs/swagger';
-import { CreateUsuarioTenantDto } from './create-usuario-tenant.dto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsOptional,
+  IsNumber,
+  IsObject,
+  ValidateNested,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ActualizarUsuarioDto } from '../../usuarios/dto';
+import { UpdatePersonalCooperativaDto } from '../../personal-cooperativa/dto';
 import { RolUsuario } from '@prisma/client';
-
-export class UpdateUsuarioTenantDto extends PartialType(
-  CreateUsuarioTenantDto,
-) {
-  @ApiPropertyOptional({
+import { UpdateUsuarioSinTipoDto } from './update-usuario-sin-tipo.dto';
+export class UpdateUsuarioTenantDto {
+  @ApiProperty({
     description: 'Rol que tendrá el usuario en el tenant',
     enum: RolUsuario,
     example: RolUsuario.OFICINISTA,
@@ -15,14 +22,26 @@ export class UpdateUsuarioTenantDto extends PartialType(
   @IsEnum(RolUsuario, {
     message: 'El rol debe ser uno de los valores permitidos',
   })
-  @IsOptional()
-  rol?: RolUsuario;
+  @IsNotEmpty({ message: 'El rol es requerido' })
+  rol: RolUsuario;
 
   @ApiPropertyOptional({
-    description: 'Estado activo de la relación usuario-tenant',
-    example: true,
+    description: 'Datos del usuario a actualizar',
+    type: () => UpdateUsuarioSinTipoDto,
   })
-  @IsBoolean({ message: 'El estado activo debe ser un booleano' })
   @IsOptional()
-  activo?: boolean;
+  @IsObject({ message: 'Los datos del usuario deben ser un objeto válido' })
+  @ValidateNested()
+  @Type(() => UpdateUsuarioSinTipoDto)
+  usuario?: UpdateUsuarioSinTipoDto;
+
+  @ApiPropertyOptional({
+    description: 'Datos personales del usuario en la cooperativa',
+    type: () => UpdatePersonalCooperativaDto,
+  })
+  @IsOptional()
+  @IsObject({ message: 'Los datos personales deben ser un objeto válido' })
+  @ValidateNested()
+  @Type(() => UpdatePersonalCooperativaDto)
+  infoPersonal?: UpdatePersonalCooperativaDto;
 }

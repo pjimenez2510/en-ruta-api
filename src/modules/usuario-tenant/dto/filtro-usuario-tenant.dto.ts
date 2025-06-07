@@ -14,15 +14,6 @@ export class FiltroUsuarioTenantDto {
   usuarioId?: number;
 
   @ApiProperty({
-    description: 'Filtrar por ID de tenant',
-    required: false,
-  })
-  @IsInt({ message: 'El ID del tenant debe ser un número entero' })
-  @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value) : undefined))
-  tenantId?: number;
-
-  @ApiProperty({
     description: 'Filtrar por rol',
     enum: RolUsuario,
     required: false,

@@ -17,8 +17,6 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario } from '@prisma/client';
-import { RequireTenant } from '../../common/decorators/require-tenant.decorator';
-import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { CreateClienteDto, UpdateClienteDto, FiltroClienteDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { filtroClienteBuild } from './utils/filtro-cliente-build';
@@ -27,7 +25,6 @@ import { filtroClienteBuild } from './utils/filtro-cliente-build';
 @ApiBearerAuth()
 @Controller('clientes')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@RequireTenant()
 export class ClientesController {
   constructor(private readonly clientesService: ClientesService) {}
 

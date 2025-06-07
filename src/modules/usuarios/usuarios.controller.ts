@@ -1,8 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
   Param,
   UseGuards,
   ParseIntPipe,
@@ -11,6 +9,8 @@ import {
   Delete,
   HttpCode,
   Query,
+  Body,
+  Post,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -20,11 +20,10 @@ import { TipoUsuario } from '@prisma/client';
 import { UsuarioActual } from '../../common/decorators/usuario-actual.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import {
-  CrearUsuarioDto,
   ActualizarUsuarioDto,
   PerfilUsuarioDto,
-  TenantUsuarioDto,
   FiltroUsuarioDto,
+  CrearUsuarioDto,
 } from './dto';
 import { filtroUsuarioBuild } from './utils/filtro-usuario-build';
 
@@ -33,6 +32,14 @@ import { filtroUsuarioBuild } from './utils/filtro-usuario-build';
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
+
+  @ApiOperation({ summary: 'Crear un nuevo usuario' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(TipoUsuario.ADMIN_SISTEMA)
+  @Post()
+  async crearUsuario(@Body() crearUsuarioDto: CrearUsuarioDto) {
+    return this.usuariosService.crearUsuario(crearUsuarioDto);
+  }
 
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -59,15 +66,6 @@ export class UsuariosController {
   @Get('perfil')
   async obtenerPerfil(@UsuarioActual() usuario): Promise<PerfilUsuarioDto> {
     return usuario;
-  }
-
-  @ApiOperation({ summary: 'Crear un nuevo usuario' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA)
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async crearUsuario(@Body() crearUsuarioDto: CrearUsuarioDto) {
-    return this.usuariosService.crearUsuario(crearUsuarioDto);
   }
 
   @ApiOperation({ summary: 'Actualizar un usuario existente' })
