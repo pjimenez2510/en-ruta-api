@@ -13,6 +13,7 @@ import { ClientesModule } from './modules/clientes/clientes.module';
 import { UsuarioTenantModule } from './modules/usuario-tenant/usuario-tenant.module';
 import { TipoAsientosModule } from './modules/tipo-asientos/tipo-asientos.module';
 import { ModelosBusModule } from './modules/modelos-bus/modelos-bus.module';
+import { BusesModule } from './modules/buses/buses.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ModelosBusModule } from './modules/modelos-bus/modelos-bus.module';
     UsuarioTenantModule,
     TipoAsientosModule,
     ModelosBusModule,
+    BusesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

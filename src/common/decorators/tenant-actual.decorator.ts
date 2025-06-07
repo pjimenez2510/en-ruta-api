@@ -7,7 +7,7 @@ import {
 export const TenantActual = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    const tenant = request.user?.tenants[0];
+    const tenant = request.user?.tenants[0]?.tenant;
 
     if (!tenant) {
       throw new UnauthorizedException('No hay tenant activo para este usuario');
