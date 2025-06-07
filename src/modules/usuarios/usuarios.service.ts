@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, Usuario, TipoUsuario } from '@prisma/client';
@@ -52,7 +53,7 @@ export class UsuariosService {
   ): Promise<Usuario> {
     const { username, password, tipoUsuario } = crearUsuarioDto;
     const passwordHash = await this.hashPassword(password);
-    const usuarioExistente = await this.prisma.usuario.findUnique({
+    const usuarioExistente = await (tx || this.prisma).usuario.findUnique({
       where: { username },
     });
     if (usuarioExistente) {
@@ -84,7 +85,7 @@ export class UsuariosService {
       actualizarUsuarioDto.username &&
       actualizarUsuarioDto.username !== usuarioExistente.username
     ) {
-      const existente = await this.prisma.usuario.findUnique({
+      const existente = await (tx || this.prisma).usuario.findUnique({
         where: { username: actualizarUsuarioDto.username, NOT: { id: id } },
       });
 
@@ -131,6 +132,12 @@ export class UsuariosService {
       },
     });
     if (!usuario) return null;
+
+    console.log('usuario', usuario);
+
+    if (!usuario.activo) {
+      throw new UnauthorizedException('Usuario inactivo');
+    }
 
     const passwordValida = await this.validarPassword(
       password,

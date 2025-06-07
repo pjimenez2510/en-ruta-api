@@ -18,7 +18,6 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario } from '@prisma/client';
-import { RequireTenant } from '../../common/decorators/require-tenant.decorator';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { UsuarioActual } from '../../common/decorators/usuario-actual.decorator';
 import { CreateTenantDto, UpdateTenantDto } from './dto';
@@ -63,7 +62,6 @@ export class TenantsController {
   @ApiOperation({ summary: 'Actualizar tenant' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
-  @RequireTenant()
   @Put(':id')
   async actualizarTenant(
     @Param('id', ParseIntPipe) id: number,

@@ -46,12 +46,6 @@ export class CreateConfiguracionesTenantDto {
   @IsOptional()
   descripcion?: string;
 
-  @ApiProperty({
-    description: 'ID del tenant al que pertenece la configuración',
-    example: 1,
-  })
-  @IsNumber({}, { message: 'El ID del tenant debe ser un número' })
-  @IsNotEmpty({ message: 'El ID del tenant es requerido' })
   tenantId: number;
 
   @ValidateIf((o) => o.tipo === TipoConfiguracion.NUMERO)

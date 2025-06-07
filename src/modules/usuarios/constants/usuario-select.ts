@@ -8,6 +8,7 @@ export const USUARIO_SELECT: Prisma.UsuarioSelect = {
   tipoUsuario: true,
   fechaRegistro: true,
   ultimoAcceso: true,
+  activo: true,
 };
 
 export const USUARIO_SELECT_WITH_RELATIONS: Prisma.UsuarioSelect = {

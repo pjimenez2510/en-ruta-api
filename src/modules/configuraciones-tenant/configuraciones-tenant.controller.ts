@@ -17,7 +17,6 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario } from '@prisma/client';
-import { RequireTenant } from '../../common/decorators/require-tenant.decorator';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import {
   CreateConfiguracionesTenantDto,
@@ -31,7 +30,6 @@ import { filtroConfiguracionesTenantBuild } from './utils/filtro-configuraciones
 @ApiBearerAuth()
 @Controller('configuraciones-tenant')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@RequireTenant()
 export class ConfiguracionesTenantController {
   constructor(
     private readonly configuracionesTenantService: ConfiguracionesTenantService,
@@ -44,7 +42,6 @@ export class ConfiguracionesTenantController {
     @Query() filtro: FiltroConfiguracionesTenantDto,
     @TenantActual() tenant,
   ) {
-    // Asegurar que solo se devuelvan configuraciones del tenant actual
     filtro.tenantId = tenant.id;
 
     const configuraciones =
@@ -64,20 +61,19 @@ export class ConfiguracionesTenantController {
     const configuracion =
       await this.configuracionesTenantService.obtenerConfiguracion({
         id,
-        tenantId: tenant.id, // Asegurar que pertenezca al tenant actual
+        tenantId: tenant.id,
       });
     return configuracion;
   }
 
   @ApiOperation({ summary: 'Crear una nueva configuración' })
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(RolUsuario.ADMIN_COOPERATIVA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearConfiguracion(
     @Body() createConfiguracionesTenantDto: CreateConfiguracionesTenantDto,
     @TenantActual() tenant,
   ) {
-    // Asegurar que la configuración se cree para el tenant actual
     createConfiguracionesTenantDto.tenantId = tenant.id;
 
     const configuracion =
@@ -95,13 +91,11 @@ export class ConfiguracionesTenantController {
     @Body() updateConfiguracionesTenantDto: UpdateConfiguracionesTenantDto,
     @TenantActual() tenant,
   ) {
-    // Asegurar que la configuración pertenezca al tenant actual
     await this.configuracionesTenantService.obtenerConfiguracion({
       id,
       tenantId: tenant.id,
     });
 
-    // Asegurar que se actualice para el mismo tenant
     updateConfiguracionesTenantDto.tenantId = tenant.id;
 
     const configuracion =
@@ -119,7 +113,6 @@ export class ConfiguracionesTenantController {
     @Param('id', ParseIntPipe) id: number,
     @TenantActual() tenant,
   ) {
-    // Asegurar que la configuración pertenezca al tenant actual
     await this.configuracionesTenantService.obtenerConfiguracion({
       id,
       tenantId: tenant.id,

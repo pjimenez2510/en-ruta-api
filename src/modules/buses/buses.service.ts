@@ -1,26 +1,154 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBusDto } from './dto/create-bus.dto';
-import { UpdateBusDto } from './dto/update-bus.dto';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+import { CreateBusDto, UpdateBusDto } from './dto';
+import { BUS_SELECT_WITH_RELATIONS } from './constants/bus-select';
 
 @Injectable()
 export class BusesService {
-  create(createBusDto: CreateBusDto) {
-    return 'This action adds a new bus';
+  constructor(private prisma: PrismaService) {}
+
+  async obtenerBuses(
+    filtro: Prisma.BusWhereInput,
+    args: Prisma.BusSelect = BUS_SELECT_WITH_RELATIONS,
+  ) {
+    return await this.prisma.bus.findMany({
+      where: filtro,
+      orderBy: { numero: 'asc' },
+      select: args,
+    });
   }
 
-  findAll() {
-    return `This action returns all buses`;
+  async obtenerBus(
+    filtro: Prisma.BusWhereUniqueInput,
+    args: Prisma.BusSelect = BUS_SELECT_WITH_RELATIONS,
+  ) {
+    const bus = await this.prisma.bus.findUnique({
+      where: filtro,
+      select: args,
+    });
+
+    if (!bus) {
+      throw new NotFoundException(
+        `Bus con el filtro ${JSON.stringify(filtro)} no encontrado`,
+      );
+    }
+
+    return bus;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bus`;
+  async crearBus(
+    tenantId: number,
+    datos: CreateBusDto,
+    tx?: Prisma.TransactionClient,
+  ) {
+    console.log('tenantId', tenantId);
+    console.log('datos', datos);
+    const existenteNumero = await this.prisma.bus.findUnique({
+      where: {
+        tenantId_numero: {
+          tenantId,
+          numero: datos.numero,
+        },
+      },
+    });
+
+    if (existenteNumero) {
+      throw new ConflictException(
+        `Ya existe un bus con el número ${datos.numero} en este tenant`,
+      );
+    }
+
+    const existentePlaca = await this.prisma.bus.findUnique({
+      where: {
+        tenantId_placa: {
+          tenantId,
+          placa: datos.placa,
+        },
+      },
+    });
+
+    if (existentePlaca) {
+      throw new ConflictException(
+        `Ya existe un bus con la placa ${datos.placa} en este tenant`,
+      );
+    }
+
+    return await (tx || this.prisma).bus.create({
+      data: {
+        ...datos,
+        tenantId,
+      },
+      select: BUS_SELECT_WITH_RELATIONS,
+    });
   }
 
-  update(id: number, updateBusDto: UpdateBusDto) {
-    return `This action updates a #${id} bus`;
+  async actualizarBus(
+    id: number,
+    tenantId: number,
+    datos: UpdateBusDto,
+    tx?: Prisma.TransactionClient,
+  ) {
+    await this.obtenerBus({ id });
+
+    if (datos.numero) {
+      const existenteNumero = await this.prisma.bus.findFirst({
+        where: {
+          tenantId,
+          numero: datos.numero,
+          NOT: {
+            id,
+          },
+        },
+      });
+
+      if (existenteNumero) {
+        throw new ConflictException(
+          `Ya existe un bus con el número ${datos.numero} en este tenant`,
+        );
+      }
+    }
+
+    if (datos.placa) {
+      const existentePlaca = await this.prisma.bus.findFirst({
+        where: {
+          tenantId,
+          placa: datos.placa,
+          NOT: {
+            id,
+          },
+        },
+      });
+
+      if (existentePlaca) {
+        throw new ConflictException(
+          `Ya existe un bus con la placa ${datos.placa} en este tenant`,
+        );
+      }
+    }
+
+    return await (tx || this.prisma).bus.update({
+      where: { id },
+      data: datos,
+      select: BUS_SELECT_WITH_RELATIONS,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bus`;
+  async cambiarEstadoBus(
+    id: number,
+    estado: Prisma.EnumEstadoBusFieldUpdateOperationsInput,
+    tx?: Prisma.TransactionClient,
+  ) {
+    await this.obtenerBus({ id });
+
+    return await (tx || this.prisma).bus.update({
+      where: { id },
+      data: { estado },
+      select: BUS_SELECT_WITH_RELATIONS,
+    });
   }
 }
