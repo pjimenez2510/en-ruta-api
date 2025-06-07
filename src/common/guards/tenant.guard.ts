@@ -26,7 +26,9 @@ export class TenantGuard implements CanActivate {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    if (!user.tenant || !user.tenant.id) {
+    const tenant = user.tenants[0];
+
+    if (!tenant || !tenant.id) {
       throw new UnauthorizedException(
         'Se requiere acceso a un tenant para esta acción',
       );

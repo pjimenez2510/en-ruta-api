@@ -29,7 +29,9 @@ import { filtroBusBuild } from './utils/filtro-bus-build';
 export class BusesController {
   constructor(private readonly busesService: BusesService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los buses' })
+  @ApiOperation({
+    summary: 'Obtener todos los buses de la cooperativa actual',
+  })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireTenant()
   @Roles(
@@ -48,7 +50,43 @@ export class BusesController {
     return buses;
   }
 
-  @ApiOperation({ summary: 'Obtener bus por ID' })
+  @ApiOperation({
+    summary:
+      'Obtener todos los buses de todas las cooperativas (Todos los usuarios pueden ver los buses - es publico)',
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    TipoUsuario.CLIENTE,
+    TipoUsuario.PERSONAL_COOPERATIVA,
+  )
+  @Get('cooperativas')
+  async obtenerBusesDeTodasLasCooperativas(@Query() filtro: FiltroBusDto) {
+    const buses = await this.busesService.obtenerBuses(filtroBusBuild(filtro));
+    return buses;
+  }
+
+  @ApiOperation({
+    summary:
+      'Obtener todos los buses de una cooperativa (Todos los usuarios pueden ver los buses - es publico)',
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    TipoUsuario.CLIENTE,
+    TipoUsuario.PERSONAL_COOPERATIVA,
+  )
+  @Get('cooperativas/:id')
+  async obtenerBusesDeUnaCooperativa(@Param('id', ParseIntPipe) id: number) {
+    const buses = await this.busesService.obtenerBuses({
+      tenantId: id,
+    });
+    return buses;
+  }
+
+  @ApiOperation({
+    summary: 'Obtener bus por ID de la cooperativa actual',
+  })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireTenant()
   @Roles(
@@ -63,7 +101,6 @@ export class BusesController {
   ) {
     const bus = await this.busesService.obtenerBus({ id });
 
-    // Verificar que el bus pertenezca al tenant actual
     if (bus.tenantId !== tenantActual.id) {
       throw new ForbiddenException('No tienes permisos para ver este bus');
     }
@@ -95,7 +132,6 @@ export class BusesController {
     @Body() updateBusDto: UpdateBusDto,
     @TenantActual() tenantActual,
   ) {
-    // Verificar que el bus pertenezca al tenant actual
     const bus = await this.busesService.obtenerBus({ id });
     if (bus.tenantId !== tenantActual.id) {
       throw new ForbiddenException(
@@ -119,7 +155,6 @@ export class BusesController {
     @Param('id', ParseIntPipe) id: number,
     @TenantActual() tenantActual,
   ) {
-    // Verificar que el bus pertenezca al tenant actual
     const bus = await this.busesService.obtenerBus({ id });
     if (bus.tenantId !== tenantActual.id) {
       throw new ForbiddenException(
@@ -141,7 +176,6 @@ export class BusesController {
     @Param('id', ParseIntPipe) id: number,
     @TenantActual() tenantActual,
   ) {
-    // Verificar que el bus pertenezca al tenant actual
     const bus = await this.busesService.obtenerBus({ id });
     if (bus.tenantId !== tenantActual.id) {
       throw new ForbiddenException(
@@ -163,7 +197,6 @@ export class BusesController {
     @Param('id', ParseIntPipe) id: number,
     @TenantActual() tenantActual,
   ) {
-    // Verificar que el bus pertenezca al tenant actual
     const bus = await this.busesService.obtenerBus({ id });
     if (bus.tenantId !== tenantActual.id) {
       throw new ForbiddenException(

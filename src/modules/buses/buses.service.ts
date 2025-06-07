@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { CreateBusDto, UpdateBusDto } from './dto';
-import { BUS_SELECT, BUS_SELECT_WITH_RELATIONS } from './constants/bus-select';
+import { BUS_SELECT_WITH_RELATIONS } from './constants/bus-select';
 
 @Injectable()
 export class BusesService {
@@ -14,7 +14,7 @@ export class BusesService {
 
   async obtenerBuses(
     filtro: Prisma.BusWhereInput,
-    args: Prisma.BusSelect = BUS_SELECT,
+    args: Prisma.BusSelect = BUS_SELECT_WITH_RELATIONS,
   ) {
     return await this.prisma.bus.findMany({
       where: filtro,
@@ -46,7 +46,8 @@ export class BusesService {
     datos: CreateBusDto,
     tx?: Prisma.TransactionClient,
   ) {
-    // Verificar si ya existe un bus con el mismo número en este tenant
+    console.log('tenantId', tenantId);
+    console.log('datos', datos);
     const existenteNumero = await this.prisma.bus.findUnique({
       where: {
         tenantId_numero: {
@@ -62,7 +63,6 @@ export class BusesService {
       );
     }
 
-    // Verificar si ya existe un bus con la misma placa en este tenant
     const existentePlaca = await this.prisma.bus.findUnique({
       where: {
         tenantId_placa: {

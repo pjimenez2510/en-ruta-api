@@ -7,7 +7,6 @@ export const filtroBusBuild = (
 ): Prisma.BusWhereInput => {
   const where: Prisma.BusWhereInput = {};
 
-  // Aplicar filtro de tenant si se proporciona
   if (tenantId) {
     where.tenantId = tenantId;
   }
