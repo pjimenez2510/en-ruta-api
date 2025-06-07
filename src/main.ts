@@ -23,7 +23,6 @@ async function bootstrap() {
     .setTitle('API de EnRuta')
     .setDescription('API para el sistema de cooperativas de transporte EnRuta')
     .setVersion('1.0')
-    .addServer(`http://localhost:${process.env.PORT ?? 3000}`, 'Servidor local')
     .addBearerAuth({
       type: 'http',
       scheme: 'bearer',
@@ -45,11 +44,7 @@ async function bootstrap() {
     `API En Ruta escuchando en el puerto ${process.env.PORT ?? 3000}`,
     'En Ruta API',
   );
-  Logger.log(
-    `Documentacion en http://localhost:${process.env.PORT ?? 3000}/api`,
-    'En Ruta API',
-  );
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, process.env.HOST ?? '0.0.0.0');
 }
 bootstrap();
