@@ -12,6 +12,7 @@ import { UsuarioTenantModule } from './modules/usuario-tenant/usuario-tenant.mod
 import { TipoAsientosModule } from './modules/tipo-asientos/tipo-asientos.module';
 import { ModelosBusModule } from './modules/modelos-bus/modelos-bus.module';
 import { BusesModule } from './modules/buses/buses.module';
+import { UbicacionAsientoPlantillasModule } from './modules/ubicacion-asiento-plantillas/ubicacion-asiento-plantillas.module';
 
 @Module({
   imports: [
@@ -19,15 +20,16 @@ import { BusesModule } from './modules/buses/buses.module';
       isGlobal: true,
     }),
     PrismaModule,
+    AuthModule,
     TenantsModule,
     UsuariosModule,
-    AuthModule,
     ConfiguracionesTenantModule,
     ClientesModule,
     UsuarioTenantModule,
     TipoAsientosModule,
     ModelosBusModule,
     BusesModule,
+    UbicacionAsientoPlantillasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
