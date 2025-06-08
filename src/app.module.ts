@@ -13,6 +13,7 @@ import { TipoAsientosModule } from './modules/tipo-asientos/tipo-asientos.module
 import { ModelosBusModule } from './modules/modelos-bus/modelos-bus.module';
 import { BusesModule } from './modules/buses/buses.module';
 import { UbicacionAsientoPlantillasModule } from './modules/ubicacion-asiento-plantillas/ubicacion-asiento-plantillas.module';
+import { PlantillaPisosModule } from './modules/plantilla-pisos/plantilla-pisos.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UbicacionAsientoPlantillasModule } from './modules/ubicacion-asiento-pl
     TipoAsientosModule,
     ModelosBusModule,
     BusesModule,
+    PlantillaPisosModule,
     UbicacionAsientoPlantillasModule,
   ],
   controllers: [AppController],
