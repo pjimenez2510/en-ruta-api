@@ -39,11 +39,7 @@ export class AsientosController {
     summary: 'Obtener todos los asientos con filtros opcionales',
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(
-    TipoUsuario.ADMIN_SISTEMA,
-    RolUsuario.ADMIN_COOPERATIVA,
-    RolUsuario.OFICINISTA,
-  )
+  @Roles(TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA)
   @Get()
   async obtenerAsientos(
     @Query() filtro: FiltroAsientoDto,
@@ -55,14 +51,30 @@ export class AsientosController {
   }
 
   @ApiOperation({
+    summary: 'Obtener todos los asientos con filtros opcionales (público)',
+  })
+  @Get('publico')
+  async obtenerAsientosPublico(@Query() filtro: FiltroAsientoDto) {
+    return await this.asientosService.obtenerAsientos({
+      filtro: filtroAsientoBuild(filtro),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Obtener un asiento por su ID (público)',
+  })
+  @Get('publico/:id')
+  async obtenerAsientoPublicoPorId(@Param('id', ParseIntPipe) id: number) {
+    return await this.asientosService.obtenerAsiento({
+      filtro: { id },
+    });
+  }
+
+  @ApiOperation({
     summary: 'Obtener un asiento por su ID',
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(
-    TipoUsuario.ADMIN_SISTEMA,
-    RolUsuario.ADMIN_COOPERATIVA,
-    RolUsuario.OFICINISTA,
-  )
+  @Roles(TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA)
   @Get(':id')
   async obtenerAsientoPorId(
     @Param('id', ParseIntPipe) id: number,

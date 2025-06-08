@@ -52,14 +52,8 @@ export class BusesController {
     summary:
       'Obtener todos los buses de todas las cooperativas (Todos los usuarios pueden ver los buses - es publico)',
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(
-    TipoUsuario.ADMIN_SISTEMA,
-    TipoUsuario.CLIENTE,
-    TipoUsuario.PERSONAL_COOPERATIVA,
-  )
-  @Get('cooperativas')
-  async obtenerBusesDeTodasLasCooperativas(@Query() filtro: FiltroBusDto) {
+  @Get('publico')
+  async obtenerBusesPublico(@Query() filtro: FiltroBusDto) {
     const buses = await this.busesService.obtenerBuses(filtroBusBuild(filtro));
     return buses;
   }
@@ -68,18 +62,22 @@ export class BusesController {
     summary:
       'Obtener todos los buses de una cooperativa (Todos los usuarios pueden ver los buses - es publico)',
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(
-    TipoUsuario.ADMIN_SISTEMA,
-    TipoUsuario.CLIENTE,
-    TipoUsuario.PERSONAL_COOPERATIVA,
-  )
-  @Get('cooperativas/:id')
-  async obtenerBusesDeUnaCooperativa(@Param('id', ParseIntPipe) id: number) {
+  @Get('cooperativa/:idCooperativa')
+  async obtenerBusesDeUnaCooperativaPublico(
+    @Param('idCooperativa', ParseIntPipe) idCooperativa: number,
+  ) {
     const buses = await this.busesService.obtenerBuses({
-      tenantId: id,
+      tenantId: idCooperativa,
     });
     return buses;
+  }
+
+  @ApiOperation({
+    summary: 'Obtener bus por ID (público)',
+  })
+  @Get('publico/:id')
+  async obtenerBusPublico(@Param('id', ParseIntPipe) id: number) {
+    return await this.busesService.obtenerBus({ id });
   }
 
   @ApiOperation({
