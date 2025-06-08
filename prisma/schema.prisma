@@ -311,6 +311,7 @@ model Asiento {
   boletos Boleto[]
 
   @@unique([pisoBusId, numero])
+  @@unique([pisoBusId, fila, columna])
   @@map("asientos")
 }
 
