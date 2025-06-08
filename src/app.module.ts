@@ -14,6 +14,7 @@ import { ModelosBusModule } from './modules/modelos-bus/modelos-bus.module';
 import { BusesModule } from './modules/buses/buses.module';
 import { UbicacionAsientoPlantillasModule } from './modules/ubicacion-asiento-plantillas/ubicacion-asiento-plantillas.module';
 import { PlantillaPisosModule } from './modules/plantilla-pisos/plantilla-pisos.module';
+import { AsientosModule } from './modules/asientos/asientos.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PlantillaPisosModule } from './modules/plantilla-pisos/plantilla-pisos.
     TipoAsientosModule,
     ModelosBusModule,
     BusesModule,
+    AsientosModule,
     PlantillaPisosModule,
     UbicacionAsientoPlantillasModule,
   ],
