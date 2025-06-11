@@ -1,5 +1,6 @@
 import { PrismaClient, TipoUsuario } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { ciudades } from './data/ciudades';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -17,7 +18,11 @@ async function main() {
     },
   });
 
-  console.log(user);
+  await prisma.ciudad.deleteMany();
+
+  await prisma.ciudad.createMany({
+    data: ciudades,
+  });
 }
 
 main()
