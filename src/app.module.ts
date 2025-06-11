@@ -16,6 +16,7 @@ import { UbicacionAsientoPlantillasModule } from './modules/ubicacion-asiento-pl
 import { PlantillaPisosModule } from './modules/plantilla-pisos/plantilla-pisos.module';
 import { AsientosModule } from './modules/asientos/asientos.module';
 import { PisosBusModule } from './modules/pisos-bus/pisos-bus.module';
+import { CiudadesModule } from './modules/ciudades/ciudades.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { PisosBusModule } from './modules/pisos-bus/pisos-bus.module';
     AsientosModule,
     PlantillaPisosModule,
     UbicacionAsientoPlantillasModule,
+    CiudadesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
