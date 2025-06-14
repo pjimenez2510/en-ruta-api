@@ -362,9 +362,8 @@ model ParadaRuta {
 model HorarioRuta {
   id         Int       @id @default(autoincrement())
   rutaId     Int
-  horaSalida DateTime  @db.Time // Solo la hora, no fecha completa
+  horaSalida String // "12:00"
   diasSemana String // "1111111" o "1111100" etc
-  tipoViaje  TipoViaje @default(CON_PARADAS)
   activo     Boolean   @default(true)
 
   // Relaciones
@@ -627,10 +626,7 @@ enum EstadoAsiento {
   RESERVADO
 }
 
-enum TipoViaje {
-  DIRECTO
-  CON_PARADAS
-}
+
 
 enum TipoDescuento {
   MENOR_EDAD
