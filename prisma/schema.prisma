@@ -141,9 +141,6 @@ model Ciudad {
   longitud  Decimal? @db.Decimal(10, 6)
   activo    Boolean  @default(true)
 
-  // Relaciones simplificadas
-  rutasOrigen  Ruta[]       @relation("RutaOrigen")
-  rutasDestino Ruta[]       @relation("RutaDestino")
   paradas      ParadaRuta[]
 
   @@map("ciudades")
@@ -317,27 +314,19 @@ model Ruta {
   id              Int      @id @default(autoincrement())
   tenantId        Int
   nombre          String
-  ciudadOrigenId  Int // Ciudad de inicio de la ruta completa
-  ciudadDestinoId Int // Ciudad final de la ruta completa
-  distanciaTotal  Decimal? @db.Decimal(10, 2)
-  duracionTotal   Int // en minutos
-  precioCompleto  Decimal  @db.Decimal(10, 2)
   resolucionId    Int
   descripcion     String?
   activo          Boolean  @default(true)
-  fechaCreacion   DateTime @default(now())
 
   // Relaciones
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
-  ciudadOrigen  Ciudad        @relation("RutaOrigen", fields: [ciudadOrigenId], references: [id])
-  ciudadDestino Ciudad        @relation("RutaDestino", fields: [ciudadDestinoId], references: [id])
   resolucion    ResolucionANT @relation(fields: [resolucionId], references: [id])
   paradas       ParadaRuta[] // Paradas intermedias ordenadas
   horarios      HorarioRuta[] // Horarios de salida de la ruta
   viajes        Viaje[] // Instancias específicas de la ruta
 
   @@unique([tenantId, nombre])
-  @@index([tenantId, ciudadOrigenId, ciudadDestinoId]) // Índice para búsquedas eficientes
+  @@index([tenantId]) // Índice para búsquedas eficientes
   @@map("rutas")
 }
 
