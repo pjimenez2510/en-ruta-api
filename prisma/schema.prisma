@@ -362,9 +362,8 @@ model ParadaRuta {
 model HorarioRuta {
   id         Int       @id @default(autoincrement())
   rutaId     Int
-  horaSalida DateTime  @db.Time // Solo la hora, no fecha completa
+  horaSalida String // "12:00"
   diasSemana String // "1111111" o "1111100" etc
-  tipoViaje  TipoViaje @default(CON_PARADAS)
   activo     Boolean   @default(true)
 
   // Relaciones
@@ -471,7 +470,7 @@ model MetodoPago {
 model Venta {
   id                Int         @id @default(autoincrement())
   tenantId          Int
-  viajeId           Int // CAMBIADO: ahora apunta directamente al viaje
+  viajeId           Int 
   usuarioId         Int
   oficinistaId      Int?
   fechaVenta        DateTime    @default(now())
@@ -480,16 +479,10 @@ model Venta {
   totalDescuentos   Decimal     @default(0) @db.Decimal(10, 2)
   totalFinal        Decimal     @db.Decimal(10, 2)
   estadoPago        EstadoPago  @default(PENDIENTE)
-  comprobanteUrl    String?
-  codigoTransaccion String?
-  origenVenta       OrigenVenta
-  ipCompra          String?
-  dispositivoInfo   String?
-  notas             String?
 
   // Relaciones
   tenant     Tenant     @relation(fields: [tenantId], references: [id])
-  viaje      Viaje      @relation(fields: [viajeId], references: [id]) // CAMBIADO
+  viaje      Viaje      @relation(fields: [viajeId], references: [id])
   comprador  Usuario    @relation("comprador", fields: [usuarioId], references: [id])
   oficinista Usuario?   @relation("oficinista", fields: [oficinistaId], references: [id])
   metodoPago MetodoPago @relation(fields: [metodoPagoId], references: [id])
@@ -528,7 +521,7 @@ model Boleto {
   paradaOrigen  ParadaRuta @relation("ParadaOrigen", fields: [paradaOrigenId], references: [id]) // CAMBIADO
   paradaDestino ParadaRuta @relation("ParadaDestino", fields: [paradaDestinoId], references: [id]) // CAMBIADO
 
-  ocupaciones       OcupacionAsiento[] // NUEVO: relaciones con ocupaciones
+  ocupaciones       OcupacionAsiento[]
   registrosAbordaje RegistroAbordaje[]
 
   @@index([tenantId])
@@ -543,10 +536,7 @@ model RegistroAbordaje {
   boletoId        Int
   usuarioId       Int
   fechaHora       DateTime       @default(now())
-  metodo          MetodoAbordaje @default(ESCANEO)
-  dispositivoInfo String?
-  latitud         Decimal?       @db.Decimal(10, 6)
-  longitud        Decimal?       @db.Decimal(10, 6)
+  estadoAbordaje  EstadoAbordaje @default(PENDIENTE)
   observaciones   String?
 
   // Relaciones
@@ -616,6 +606,13 @@ enum RolUsuario {
   AYUDANTE
 }
 
+enum EstadoAbordaje {
+  PENDIENTE
+  ABORDADO
+  NO_ABORDADO
+  CANCELADO
+}
+
 enum EstadoBus {
   ACTIVO
   MANTENIMIENTO
@@ -629,10 +626,7 @@ enum EstadoAsiento {
   RESERVADO
 }
 
-enum TipoViaje {
-  DIRECTO
-  CON_PARADAS
-}
+
 
 enum TipoDescuento {
   MENOR_EDAD
@@ -661,11 +655,7 @@ enum EstadoPago {
   RECHAZADO
 }
 
-enum OrigenVenta {
-  WEB
-  MOVIL
-  OFICINA
-}
+
 
 enum TipoDescuentoCliente {
   NINGUNO
@@ -682,10 +672,6 @@ enum EstadoBoleto {
   CANCELADO
 }
 
-enum MetodoAbordaje {
-  ESCANEO
-  MANUAL
-}
 
 enum TipoConfiguracion {
   TEXTO
