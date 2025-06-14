@@ -18,6 +18,7 @@ import { AsientosModule } from './modules/asientos/asientos.module';
 import { PisosBusModule } from './modules/pisos-bus/pisos-bus.module';
 import { CiudadesModule } from './modules/ciudades/ciudades.module';
 import { ResolucionesAntModule } from './modules/resoluciones-ant/resoluciones-ant.module';
+import { RutasModule } from './modules/rutas/rutas.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ResolucionesAntModule } from './modules/resoluciones-ant/resoluciones-a
     UbicacionAsientoPlantillasModule,
     CiudadesModule,
     ResolucionesAntModule,
+    RutasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
