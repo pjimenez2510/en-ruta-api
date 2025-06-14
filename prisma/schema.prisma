@@ -339,7 +339,6 @@ model ParadaRuta {
   distanciaAcumulada  Decimal? @db.Decimal(10, 2) // Desde el origen
   tiempoAcumulado     Int // Minutos desde el origen
   precioAcumulado     Decimal  @db.Decimal(10, 2) // Precio desde el origen
-  esParadaObligatoria Boolean  @default(true)
 
   // Relaciones
   ruta   Ruta   @relation(fields: [rutaId], references: [id], onDelete: Cascade)
