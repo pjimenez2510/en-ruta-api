@@ -11,6 +11,4 @@ export const CIUDAD_SELECT: Prisma.CiudadSelect = {
 
 export const CIUDAD_SELECT_WITH_RELATIONS: Prisma.CiudadSelect = {
   ...CIUDAD_SELECT,
-  segmentosOrigen: true,
-  segmentosDestino: true,
 };
