@@ -19,6 +19,7 @@ import { PisosBusModule } from './modules/pisos-bus/pisos-bus.module';
 import { CiudadesModule } from './modules/ciudades/ciudades.module';
 import { ResolucionesAntModule } from './modules/resoluciones-ant/resoluciones-ant.module';
 import { RutasModule } from './modules/rutas/rutas.module';
+import { ParadasRutaModule } from './modules/paradas-ruta/paradas-ruta.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { RutasModule } from './modules/rutas/rutas.module';
     CiudadesModule,
     ResolucionesAntModule,
     RutasModule,
+    ParadasRutaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
