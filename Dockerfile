@@ -23,7 +23,7 @@ ARG DUMB_INIT_VERSION
 RUN apk update && apk add --no-cache dumb-init=${DUMB_INIT_VERSION}
 COPY . .
 RUN npm ci
-RUN npx prisma generate --generator client
+RUN npx prisma db push
 RUN npm run build && npm ci --production
 
 # Production stage
