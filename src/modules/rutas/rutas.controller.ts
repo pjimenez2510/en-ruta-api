@@ -20,6 +20,7 @@ import { TipoUsuario, RolUsuario } from '@prisma/client';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { CreateRutaDto, UpdateRutaDto, FiltroRutaDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroRutaBuild } from './utils/filtro-ruta-build';
 
 @ApiTags('rutas')
@@ -28,9 +29,13 @@ import { filtroRutaBuild } from './utils/filtro-ruta-build';
 export class RutasController {
   constructor(private readonly rutasService: RutasService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todas las rutas de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('rutas', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todas las rutas de la cooperativa actual con información de ciudades origen/destino, precios y estado.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -48,20 +53,23 @@ export class RutasController {
     return rutas;
   }
 
-  @ApiOperation({
-    summary:
-      'Obtener todas las rutas de todas las cooperativas (Público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('rutas', 
+    'Lista todas las rutas disponibles de todas las cooperativas. Endpoint público útil para mostrar destinos disponibles en aplicaciones cliente.')
+  )
   @Get('publico')
   async obtenerRutasPublico(@Query() filtro: FiltroRutaDto) {
     const rutas = await this.rutasService.obtenerRutas(filtroRutaBuild(filtro));
     return rutas;
   }
 
-  @ApiOperation({
-    summary:
-      'Obtener todas las rutas de una cooperativa específica (Público)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener rutas de una cooperativa específica',
+      description: 'Lista todas las rutas de una cooperativa específica. Endpoint público que permite consultar destinos por cooperativa.',
+      isPublic: true,
+    })
+  )
   @Get('cooperativa/:idCooperativa')
   async obtenerRutasDeUnaCooperativaPublico(
     @Param('idCooperativa', ParseIntPipe) idCooperativa: number,
@@ -72,17 +80,22 @@ export class RutasController {
     return rutas;
   }
 
-  @ApiOperation({
-    summary: 'Obtener ruta por ID (público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('ruta específica', 
+    'Obtiene los detalles completos de una ruta por su ID. Incluye información de ciudades, precios, distancia y paradas.')
+  )
   @Get('publico/:id')
   async obtenerRutaPublico(@Param('id', ParseIntPipe) id: number) {
     return await this.rutasService.obtenerRuta({ id });
   }
 
-  @ApiOperation({
-    summary: 'Obtener ruta por ID de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('ruta', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de una ruta de la cooperativa actual. Verifica permisos antes de mostrar la información.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -103,7 +116,10 @@ export class RutasController {
     return ruta;
   }
 
-  @ApiOperation({ summary: 'Crear nueva ruta' })
+  @ApiOperation(
+    CommonDescriptions.create('ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea una nueva ruta en la cooperativa. Requiere ciudades origen/destino, precio base y configuración de paradas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
@@ -116,7 +132,10 @@ export class RutasController {
     return ruta;
   }
 
-  @ApiOperation({ summary: 'Actualizar ruta' })
+  @ApiOperation(
+    CommonDescriptions.update('ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza una ruta existente. Permite modificar precios, paradas, distancia y otros parámetros de la ruta.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -139,7 +158,10 @@ export class RutasController {
     );
   }
 
-  @ApiOperation({ summary: 'Desactivar ruta' })
+  @ApiOperation(
+    CommonDescriptions.changeState('ruta', 'INACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Desactiva una ruta. Las rutas inactivas no se mostrarán en búsquedas públicas ni se podrán asignar a nuevos viajes.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/desactivar')
@@ -157,7 +179,10 @@ export class RutasController {
     return await this.rutasService.desactivarRuta(id);
   }
 
-  @ApiOperation({ summary: 'Activar ruta' })
+  @ApiOperation(
+    CommonDescriptions.changeState('ruta', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Activa una ruta. Las rutas activas estarán disponibles para búsquedas públicas y asignación de viajes.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/activar')

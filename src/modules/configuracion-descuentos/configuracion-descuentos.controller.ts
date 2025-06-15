@@ -24,6 +24,7 @@ import {
   FiltroConfiguracionDescuentoDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroConfiguracionDescuentoBuild } from './utils/filtro-configuracion-descuento-build';
 
 @ApiTags('configuracion-descuentos')
@@ -32,9 +33,13 @@ import { filtroConfiguracionDescuentoBuild } from './utils/filtro-configuracion-
 export class ConfiguracionDescuentosController {
   constructor(private readonly configuracionDescuentosService: ConfiguracionDescuentosService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todas las configuraciones de descuento de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('configuraciones de descuento', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todas las configuraciones de descuento de la cooperativa actual. Incluye descuentos por edad, discapacidad, estudiantes, etc.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -54,9 +59,10 @@ export class ConfiguracionDescuentosController {
     return configuraciones;
   }
 
-  @ApiOperation({
-    summary: 'Obtener todas las configuraciones de descuento activas (Público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('configuraciones de descuento activas', 
+    'Lista todas las configuraciones de descuento activas de todas las cooperativas. Endpoint público para mostrar descuentos disponibles.')
+  )
   @Get('publico')
   async obtenerConfiguracionesDescuentoPublico(@Query() filtro: FiltroConfiguracionDescuentoDto) {
     const filtroPublico = { ...filtro, activo: true };
@@ -68,9 +74,13 @@ export class ConfiguracionDescuentosController {
     return configuraciones;
   }
 
-  @ApiOperation({
-    summary: 'Obtener configuraciones de descuento de una cooperativa específica (Público)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener descuentos de una cooperativa específica',
+      description: 'Lista las configuraciones de descuento activas de una cooperativa específica. Endpoint público que permite consultar descuentos por cooperativa.',
+      isPublic: true,
+    })
+  )
   @Get('cooperativa/:idCooperativa')
   async obtenerConfiguracionesDescuentoDeUnaCooperativaPublico(
     @Param('idCooperativa', ParseIntPipe) idCooperativa: number,
@@ -85,17 +95,22 @@ export class ConfiguracionDescuentosController {
     return configuraciones;
   }
 
-  @ApiOperation({
-    summary: 'Obtener configuración de descuento por ID (público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('configuración de descuento específica', 
+    'Obtiene los detalles de una configuración de descuento por su ID. Incluye porcentajes, condiciones y requisitos.')
+  )
   @Get('publico/:id')
   async obtenerConfiguracionDescuentoPublico(@Param('id', ParseIntPipe) id: number) {
     return await this.configuracionDescuentosService.obtenerConfiguracionDescuento({ id });
   }
 
-  @ApiOperation({
-    summary: 'Obtener configuración de descuento por ID de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('configuración de descuento', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de una configuración de descuento de la cooperativa actual.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -113,7 +128,10 @@ export class ConfiguracionDescuentosController {
     });
   }
 
-  @ApiOperation({ summary: 'Crear nueva configuración de descuento' })
+  @ApiOperation(
+    CommonDescriptions.create('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea una nueva configuración de descuento. Define porcentajes, condiciones de aplicación y tipos de descuento disponibles.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
@@ -129,7 +147,10 @@ export class ConfiguracionDescuentosController {
     return configuracion;
   }
 
-  @ApiOperation({ summary: 'Actualizar configuración de descuento' })
+  @ApiOperation(
+    CommonDescriptions.update('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza una configuración de descuento existente. Permite modificar porcentajes, condiciones y estado de la configuración.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -145,7 +166,10 @@ export class ConfiguracionDescuentosController {
     );
   }
 
-  @ApiOperation({ summary: 'Desactivar configuración de descuento' })
+  @ApiOperation(
+    CommonDescriptions.changeState('configuración de descuento', 'DESACTIVADA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Desactiva una configuración de descuento. Los descuentos desactivados no se aplicarán en nuevas ventas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/desactivar')
@@ -159,7 +183,10 @@ export class ConfiguracionDescuentosController {
     );
   }
 
-  @ApiOperation({ summary: 'Activar configuración de descuento' })
+  @ApiOperation(
+    CommonDescriptions.changeState('configuración de descuento', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Activa una configuración de descuento. Los descuentos activos se aplicarán automáticamente según sus condiciones.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/activar')
@@ -173,7 +200,10 @@ export class ConfiguracionDescuentosController {
     );
   }
 
-  @ApiOperation({ summary: 'Eliminar configuración de descuento' })
+  @ApiOperation(
+    CommonDescriptions.delete('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Elimina permanentemente una configuración de descuento. CUIDADO: Esta acción no se puede deshacer.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')
@@ -187,7 +217,17 @@ export class ConfiguracionDescuentosController {
     );
   }
 
-  @ApiOperation({ summary: 'Obtener configuración de descuento por tipo' })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener configuración de descuento por tipo',
+      description: 'Busca configuraciones de descuento por tipo específico (edad, discapacidad, estudiante, etc.). Útil para aplicar descuentos automáticamente.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,

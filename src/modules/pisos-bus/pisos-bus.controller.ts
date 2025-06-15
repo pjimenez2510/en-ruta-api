@@ -22,6 +22,7 @@ import { TipoUsuario, RolUsuario } from '@prisma/client';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { CreatePisoBusDto, UpdatePisoBusDto, FiltroPisoBusDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroPisoBusBuild } from './utils/filtro-piso-bus-build';
 
 @ApiTags('pisos-bus')
@@ -30,9 +31,10 @@ import { filtroPisoBusBuild } from './utils/filtro-piso-bus-build';
 export class PisosBusController {
   constructor(private readonly pisosBusService: PisosBusService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todos los pisos de buses con filtros opcionales',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('pisos de bus', [TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA], 
+    'Lista todos los pisos de buses de la cooperativa actual. Incluye información de distribución, capacidad y configuración de asientos.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA)
   @Get()
@@ -45,10 +47,10 @@ export class PisosBusController {
     });
   }
 
-  @ApiOperation({
-    summary:
-      'Obtener todos los pisos de buses con filtros opcionales (público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('pisos de bus', 
+    'Lista todos los pisos de buses disponibles. Endpoint público útil para mostrar distribuciones de asientos en aplicaciones cliente.')
+  )
   @Get('publico')
   async obtenerPisosBusPublico(@Query() filtro: FiltroPisoBusDto) {
     return await this.pisosBusService.obtenerPisosBus({
@@ -56,9 +58,10 @@ export class PisosBusController {
     });
   }
 
-  @ApiOperation({
-    summary: 'Obtener un piso de bus por su ID (público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('piso de bus específico', 
+    'Obtiene los detalles de un piso de bus por su ID. Incluye distribución de asientos y configuraciones específicas.')
+  )
   @Get('publico/:id')
   async obtenerPisoBusPublicoPorId(@Param('id', ParseIntPipe) id: number) {
     return await this.pisosBusService.obtenerPisoBus({
@@ -66,9 +69,10 @@ export class PisosBusController {
     });
   }
 
-  @ApiOperation({
-    summary: 'Obtener un piso de bus por su ID',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('piso de bus', [TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA], 
+    'Obtiene los detalles completos de un piso de bus de la cooperativa actual. Verifica permisos antes de mostrar la información.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA)
   @Get(':id')
@@ -101,7 +105,10 @@ export class PisosBusController {
     });
   }
 
-  @ApiOperation({ summary: 'Crear un nuevo piso de bus' })
+  @ApiOperation(
+    CommonDescriptions.create('piso de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea un nuevo piso en un bus. Define la distribución y configuración de asientos según una plantilla o configuración personalizada.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
@@ -123,7 +130,10 @@ export class PisosBusController {
     return await this.pisosBusService.crearPisoBus(createPisoBusDto);
   }
 
-  @ApiOperation({ summary: 'Actualizar un piso de bus existente' })
+  @ApiOperation(
+    CommonDescriptions.update('piso de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza un piso de bus existente. Permite modificar distribución, configuración y asignación de plantillas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -158,7 +168,10 @@ export class PisosBusController {
     return await this.pisosBusService.actualizarPisoBus(id, updatePisoBusDto);
   }
 
-  @ApiOperation({ summary: 'Eliminar un piso de bus' })
+  @ApiOperation(
+    CommonDescriptions.delete('piso de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Elimina un piso de bus del sistema. CUIDADO: Esta acción eliminará todos los asientos asociados a este piso.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')

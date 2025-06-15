@@ -31,6 +31,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { filtroVentaBuild } from './utils/filtro-venta-build';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 
 @ApiTags('ventas')
 @ApiBearerAuth()
@@ -41,9 +42,15 @@ export class VentasController {
     private readonly descuentoCalculatorService: DescuentoCalculatorService,
   ) {}
 
-  @ApiOperation({
-    summary: 'Obtener todas las ventas de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('ventas', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+      RolUsuario.CONDUCTOR,
+      RolUsuario.AYUDANTE,
+    ], 'Lista todas las ventas realizadas en la cooperativa con filtros por fecha, estado de pago, cliente, etc. Incluye información de boletos asociados.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -64,9 +71,13 @@ export class VentasController {
     return ventas;
   }
 
-  @ApiOperation({
-    summary: 'Obtener venta por ID',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('venta', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de una venta específica incluyendo todos los boletos generados, información del cliente y estado de pago.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -85,9 +96,17 @@ export class VentasController {
     return venta;
   }
 
-  @ApiOperation({
-    summary: 'Crear nueva venta (procesamiento completo)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Crear nueva venta (procesamiento completo)',
+      description: 'Procesa una venta completa generando automáticamente los boletos correspondientes. Valida disponibilidad de asientos, calcula precios con descuentos aplicables y crea los registros necesarios.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -109,9 +128,13 @@ export class VentasController {
     return venta;
   }
 
-  @ApiOperation({
-    summary: 'Crear venta como cliente (usuario autenticado)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Comprar boletos como cliente',
+      description: 'Permite a un cliente autenticado comprar boletos directamente. El sistema valida automáticamente la disponibilidad, aplica descuentos correspondientes y genera los boletos con códigos de acceso únicos.',
+      roles: [TipoUsuario.CLIENTE],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.CLIENTE)
   @Post('comprar')

@@ -19,6 +19,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario } from '@prisma/client';
 import { UsuarioActual } from '../../common/decorators/usuario-actual.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import {
   ActualizarUsuarioDto,
   PerfilUsuarioDto,
@@ -33,7 +34,10 @@ import { filtroUsuarioBuild } from './utils/filtro-usuario-build';
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
-  @ApiOperation({ summary: 'Crear un nuevo usuario' })
+  @ApiOperation(
+    CommonDescriptions.create('usuario', [TipoUsuario.ADMIN_SISTEMA], 
+    'Crea un nuevo usuario en el sistema. Solo administradores del sistema pueden crear usuarios. Requiere información básica como email, contraseña y tipo de usuario.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Post()
@@ -41,7 +45,10 @@ export class UsuariosController {
     return this.usuariosService.crearUsuario(crearUsuarioDto);
   }
 
-  @ApiOperation({ summary: 'Obtener todos los usuarios' })
+  @ApiOperation(
+    CommonDescriptions.getAll('usuarios', [TipoUsuario.ADMIN_SISTEMA], 
+    'Lista todos los usuarios del sistema con filtros por tipo, estado, email, etc. Solo administradores del sistema pueden ver la lista completa de usuarios.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Get()
@@ -52,7 +59,10 @@ export class UsuariosController {
     return usuarios;
   }
 
-  @ApiOperation({ summary: 'Obtener usuario por ID' })
+  @ApiOperation(
+    CommonDescriptions.getById('usuario', [TipoUsuario.ADMIN_SISTEMA], 
+    'Obtiene los detalles completos de un usuario específico por su ID. Solo administradores del sistema pueden ver información de cualquier usuario.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Get(':id')
@@ -61,14 +71,23 @@ export class UsuariosController {
     return usuario;
   }
 
-  @ApiOperation({ summary: 'Obtener perfil del usuario actual' })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener perfil del usuario autenticado',
+      description: 'Obtiene la información del perfil del usuario actualmente autenticado. Cualquier usuario puede ver su propio perfil.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, TipoUsuario.CLIENTE, TipoUsuario.PERSONAL_COOPERATIVA],
+    })
+  )
   @UseGuards(JwtAuthGuard)
   @Get('perfil')
   async obtenerPerfil(@UsuarioActual() usuario): Promise<PerfilUsuarioDto> {
     return usuario;
   }
 
-  @ApiOperation({ summary: 'Actualizar un usuario existente' })
+  @ApiOperation(
+    CommonDescriptions.update('usuario', [TipoUsuario.ADMIN_SISTEMA], 
+    'Actualiza la información de un usuario existente como email, estado o tipo. Solo administradores del sistema pueden actualizar usuarios.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id')
@@ -79,7 +98,10 @@ export class UsuariosController {
     return this.usuariosService.actualizarUsuario(id, actualizarUsuarioDto);
   }
 
-  @ApiOperation({ summary: 'Desactivar un usuario' })
+  @ApiOperation(
+    CommonDescriptions.delete('usuario', [TipoUsuario.ADMIN_SISTEMA], 
+    'Desactiva un usuario del sistema. El usuario no se elimina físicamente sino que se marca como inactivo. Solo administradores del sistema pueden desactivar usuarios.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Delete(':id')

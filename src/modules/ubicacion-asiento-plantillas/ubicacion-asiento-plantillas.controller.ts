@@ -23,6 +23,7 @@ import {
   FiltroUbicacionAsientoPlantillaDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroUbicacionAsientoPlantillaBuild } from './utils/filtro-ubicacion-asiento-plantilla-build';
 
 @ApiTags('ubicacion-asiento-plantillas')
@@ -33,9 +34,13 @@ export class UbicacionAsientoPlantillasController {
     private readonly ubicacionAsientoPlantillasService: UbicacionAsientoPlantillasService,
   ) {}
 
-  @ApiOperation({
-    summary: 'Obtener todas las ubicaciones de asientos en plantillas',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('ubicaciones de asientos en plantillas', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todas las ubicaciones de asientos configuradas en plantillas. Define posiciones, coordenadas y distribuciones espaciales.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -53,9 +58,13 @@ export class UbicacionAsientoPlantillasController {
     );
   }
 
-  @ApiOperation({
-    summary: 'Obtener ubicación de asiento en plantilla por ID',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('ubicación de asiento en plantilla', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles de una ubicación específica de asiento en plantilla. Incluye coordenadas, estado y configuraciones.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -73,7 +82,10 @@ export class UbicacionAsientoPlantillasController {
     );
   }
 
-  @ApiOperation({ summary: 'Crear nueva ubicación de asiento en plantilla' })
+  @ApiOperation(
+    CommonDescriptions.create('ubicación de asiento en plantilla', [TipoUsuario.ADMIN_SISTEMA], 
+    'Crea una nueva ubicación de asiento en una plantilla. Define posición espacial, coordenadas y configuraciones para la distribución automática de asientos.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Post()
@@ -87,7 +99,10 @@ export class UbicacionAsientoPlantillasController {
     );
   }
 
-  @ApiOperation({ summary: 'Actualizar ubicación de asiento en plantilla' })
+  @ApiOperation(
+    CommonDescriptions.update('ubicación de asiento en plantilla', [TipoUsuario.ADMIN_SISTEMA], 
+    'Actualiza una ubicación de asiento en plantilla existente. Permite modificar coordenadas, estado y configuraciones espaciales.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id')
@@ -102,7 +117,10 @@ export class UbicacionAsientoPlantillasController {
     );
   }
 
-  @ApiOperation({ summary: 'Eliminar ubicación de asiento en plantilla' })
+  @ApiOperation(
+    CommonDescriptions.delete('ubicación de asiento en plantilla', [TipoUsuario.ADMIN_SISTEMA], 
+    'Elimina una ubicación de asiento de la plantilla. CUIDADO: Esta acción puede afectar buses que usen esta plantilla.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Delete(':id')
@@ -114,7 +132,10 @@ export class UbicacionAsientoPlantillasController {
     );
   }
 
-  @ApiOperation({ summary: 'Habilitar ubicación de asiento en plantilla' })
+  @ApiOperation(
+    CommonDescriptions.changeState('ubicación de asiento', 'HABILITADA', [TipoUsuario.ADMIN_SISTEMA], 
+    'Habilita una ubicación de asiento en la plantilla. Las ubicaciones habilitadas estarán disponibles para crear asientos.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id/habilitar')
@@ -127,7 +148,10 @@ export class UbicacionAsientoPlantillasController {
     );
   }
 
-  @ApiOperation({ summary: 'Deshabilitar ubicación de asiento en plantilla' })
+  @ApiOperation(
+    CommonDescriptions.changeState('ubicación de asiento', 'DESHABILITADA', [TipoUsuario.ADMIN_SISTEMA], 
+    'Deshabilita una ubicación de asiento en la plantilla. Las ubicaciones deshabilitadas no se usarán para crear nuevos asientos.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id/deshabilitar')

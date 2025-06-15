@@ -24,6 +24,7 @@ import {
   FiltroTipoAsientoDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroTipoAsientoBuild } from './utils/filtro-tipo-asiento-build';
 
 @ApiTags('tipo-asientos')
@@ -33,7 +34,10 @@ import { filtroTipoAsientoBuild } from './utils/filtro-tipo-asiento-build';
 export class TipoAsientosController {
   constructor(private readonly tipoAsientosService: TipoAsientosService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los tipos de asiento' })
+  @ApiOperation(
+    CommonDescriptions.getAll('tipos de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Lista todos los tipos de asiento de la cooperativa actual. Incluye categorías como VIP, ejecutivo, económico con sus características y precios.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get()
   async obtenerTiposAsiento(
@@ -46,7 +50,10 @@ export class TipoAsientosController {
     return tiposAsiento;
   }
 
-  @ApiOperation({ summary: 'Obtener un tipo de asiento por ID' })
+  @ApiOperation(
+    CommonDescriptions.getById('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Obtiene los detalles completos de un tipo de asiento específico. Incluye características, precios y configuraciones.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get(':id')
   async obtenerTipoAsientoPorId(
@@ -60,7 +67,10 @@ export class TipoAsientosController {
     return tipoAsiento;
   }
 
-  @ApiOperation({ summary: 'Crear un nuevo tipo de asiento' })
+  @ApiOperation(
+    CommonDescriptions.create('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea un nuevo tipo de asiento para la cooperativa. Define categorías, características, precios y niveles de servicio.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -75,7 +85,10 @@ export class TipoAsientosController {
     return tipoAsiento;
   }
 
-  @ApiOperation({ summary: 'Actualizar un tipo de asiento' })
+  @ApiOperation(
+    CommonDescriptions.update('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza un tipo de asiento existente. Permite modificar características, precios y configuraciones del servicio.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
   async actualizarTipoAsiento(
@@ -95,7 +108,13 @@ export class TipoAsientosController {
     return tipoAsiento;
   }
 
-  @ApiOperation({ summary: 'Desactivar o eliminar un tipo de asiento' })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Desactivar tipo de asiento',
+      description: 'Desactiva un tipo de asiento de la cooperativa. Los tipos desactivados no estarán disponibles para nuevos asientos pero se mantienen para compatibilidad histórica.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+    })
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')
   async desactivarTipoAsiento(

@@ -25,6 +25,7 @@ import {
   CreateUsuarioTenantDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroUsuarioTenantBuild } from './utils/filtro-usuario-tenant-build';
 import { CreatePersonalCooperativaDto } from '../personal-cooperativa/dto';
 
@@ -35,7 +36,10 @@ import { CreatePersonalCooperativaDto } from '../personal-cooperativa/dto';
 export class UsuarioTenantController {
   constructor(private readonly usuarioTenantService: UsuarioTenantService) {}
 
-  @ApiOperation({ summary: 'Obtener todas las relaciones usuario-tenant' })
+  @ApiOperation(
+    CommonDescriptions.getAll('relaciones usuario-cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Lista todas las relaciones entre usuarios y la cooperativa actual. Incluye roles asignados, estado y información personal.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get()
   async obtenerUsuariosTenant(
@@ -49,7 +53,10 @@ export class UsuarioTenantController {
     return usuariosTenant;
   }
 
-  @ApiOperation({ summary: 'Obtener una relación usuario-tenant por ID' })
+  @ApiOperation(
+    CommonDescriptions.getById('relación usuario-cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Obtiene los detalles de una relación específica entre usuario y cooperativa. Incluye rol, permisos y datos personales.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get(':id')
   async obtenerUsuarioTenantPorId(
@@ -68,11 +75,13 @@ export class UsuarioTenantController {
     return usuarioTenant;
   }
 
-  @ApiOperation({
-    summary: 'Crear un usuario con relación a tenant y datos personales',
-    description:
-      'Crea un nuevo usuario, lo asigna a un tenant con un rol específico y guarda sus datos personales',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Crear usuario con asignación a cooperativa',
+      description: 'Crea un nuevo usuario, lo asigna a la cooperativa con un rol específico y guarda sus datos personales. Proceso integral de alta de personal.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+    })
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -86,12 +95,13 @@ export class UsuarioTenantController {
     return resultado;
   }
 
-  @ApiOperation({
-    summary:
-      'Actualizar un usuario con su relación a tenant y datos personales',
-    description:
-      'Actualiza en una sola operación los datos del usuario, su relación con el tenant y su información personal',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Actualizar usuario y su relación con cooperativa',
+      description: 'Actualiza en una sola operación los datos del usuario, su relación con la cooperativa y su información personal. Permite cambios de rol y datos.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+    })
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
   async actualizarUsuarioTenant(
@@ -116,9 +126,13 @@ export class UsuarioTenantController {
     return resultado;
   }
 
-  @ApiOperation({
-    summary: 'Asignar información personal a un usuario-tenant',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Asignar información personal a usuario-cooperativa',
+      description: 'Asigna o actualiza la información personal y laboral de un usuario en la cooperativa. Incluye datos de contacto, cargo y detalles específicos del trabajo.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+    })
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post(':id/asignar-info-personal')
   async asignarInfoPersonal(
@@ -141,7 +155,13 @@ export class UsuarioTenantController {
     return resultado;
   }
 
-  @ApiOperation({ summary: 'Desactivar una relación usuario-tenant' })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Desactivar relación usuario-cooperativa',
+      description: 'Desactiva la relación entre un usuario y la cooperativa. El usuario no podrá acceder a recursos de la cooperativa pero se mantiene en el sistema para integridad histórica.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+    })
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')
   async desactivarUsuarioTenant(
