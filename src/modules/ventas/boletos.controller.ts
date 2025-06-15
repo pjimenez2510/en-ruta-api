@@ -18,6 +18,7 @@ import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { UsuarioActual } from '../../common/decorators/usuario-actual.decorator';
 import { FiltroBoletoDto, UpdateBoletoDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroBoletoBuilder } from './utils/filtro-boleto-build';
 
 @ApiTags('boletos')
@@ -26,9 +27,15 @@ import { filtroBoletoBuilder } from './utils/filtro-boleto-build';
 export class BoletosController {
   constructor(private readonly boletosService: BoletosService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todos los boletos de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('boletos', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+      RolUsuario.CONDUCTOR,
+      RolUsuario.AYUDANTE,
+    ], 'Lista todos los boletos de la cooperativa actual con filtros por viaje, cliente, estado, fecha, etc. Incluye información completa del viaje y cliente.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -48,9 +55,19 @@ export class BoletosController {
     return boletos;
   }
 
-  @ApiOperation({
-    summary: 'Buscar boletos por término',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Buscar boletos por término de búsqueda',
+      description: 'Realiza una búsqueda flexible de boletos por código, nombre del cliente, documento o información del viaje. Útil para encontrar boletos rápidamente.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+        RolUsuario.CONDUCTOR,
+        RolUsuario.AYUDANTE,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -75,9 +92,17 @@ export class BoletosController {
     return boletos;
   }
 
-  @ApiOperation({
-    summary: 'Obtener estadísticas de boletos',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener estadísticas de boletos',
+      description: 'Genera estadísticas detalladas de boletos vendidos, estados, ingresos y métricas de rendimiento para un rango de fechas específico.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -103,9 +128,13 @@ export class BoletosController {
     return estadisticas;
   }
 
-  @ApiOperation({
-    summary: 'Obtener boleto por código de acceso (público)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener boleto por código de acceso',
+      description: 'Consulta un boleto usando su código de acceso único. Endpoint público útil para que los clientes verifiquen sus boletos.',
+      isPublic: true,
+    })
+  )
   @Get('codigo/:codigoAcceso')
   async obtenerBoletoPorCodigo(
     @Param('codigoAcceso') codigoAcceso: string,
@@ -114,9 +143,13 @@ export class BoletosController {
     return boleto;
   }
 
-  @ApiOperation({
-    summary: 'Obtener boleto por ID',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('boleto', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de un boleto específico de la cooperativa actual. Incluye información del viaje, cliente y historial de estados.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -135,9 +168,19 @@ export class BoletosController {
     return boleto;
   }
 
-  @ApiOperation({
-    summary: 'Obtener boletos por viaje',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener boletos por viaje',
+      description: 'Lista todos los boletos vendidos para un viaje específico. Útil para conductores y personal para verificar pasajeros y disponibilidad.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+        RolUsuario.CONDUCTOR,
+        RolUsuario.AYUDANTE,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -158,9 +201,17 @@ export class BoletosController {
     return boletos;
   }
 
-  @ApiOperation({
-    summary: 'Obtener boletos por venta',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener boletos por venta',
+      description: 'Lista todos los boletos generados en una venta específica. Útil para revisar detalles de una transacción completa.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -179,9 +230,17 @@ export class BoletosController {
     return boletos;
   }
 
-  @ApiOperation({
-    summary: 'Obtener boletos por cliente',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener boletos por cliente',
+      description: 'Lista todos los boletos comprados por un cliente específico en un rango de fechas. Incluye historial completo de viajes.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -209,9 +268,13 @@ export class BoletosController {
     return boletos;
   }
 
-  @ApiOperation({
-    summary: 'Actualizar estado de boleto',
-  })
+  @ApiOperation(
+    CommonDescriptions.update('boleto', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Actualiza el estado o información de un boleto. Permite cambios administrativos en boletos existentes.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,

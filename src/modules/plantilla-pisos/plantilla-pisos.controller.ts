@@ -23,6 +23,7 @@ import {
   FiltroPlantillaPisoDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroPlantillaPisoBuild } from './utils/filtro-plantilla-piso-build';
 
 @ApiTags('plantilla-pisos')
@@ -31,9 +32,13 @@ import { filtroPlantillaPisoBuild } from './utils/filtro-plantilla-piso-build';
 export class PlantillaPisosController {
   constructor(private readonly plantillaPisosService: PlantillaPisosService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todas las plantillas de piso',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('plantillas de piso', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todas las plantillas de piso disponibles. Incluye plantillas predefinidas y personalizadas para diferentes tipos de buses.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -47,9 +52,13 @@ export class PlantillaPisosController {
     });
   }
 
-  @ApiOperation({
-    summary: 'Obtener plantilla de piso por ID',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('plantilla de piso', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de una plantilla de piso. Incluye distribución de asientos, dimensiones y configuraciones.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -63,7 +72,10 @@ export class PlantillaPisosController {
     });
   }
 
-  @ApiOperation({ summary: 'Crear nueva plantilla de piso' })
+  @ApiOperation(
+    CommonDescriptions.create('plantilla de piso', [TipoUsuario.ADMIN_SISTEMA], 
+    'Crea una nueva plantilla de piso. Solo administradores del sistema pueden crear plantillas que estarán disponibles para todas las cooperativas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Post()
@@ -76,7 +88,10 @@ export class PlantillaPisosController {
     );
   }
 
-  @ApiOperation({ summary: 'Actualizar plantilla de piso' })
+  @ApiOperation(
+    CommonDescriptions.update('plantilla de piso', [TipoUsuario.ADMIN_SISTEMA], 
+    'Actualiza una plantilla de piso existente. Solo administradores del sistema pueden modificar plantillas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id')
@@ -90,7 +105,10 @@ export class PlantillaPisosController {
     );
   }
 
-  @ApiOperation({ summary: 'Eliminar plantilla de piso' })
+  @ApiOperation(
+    CommonDescriptions.delete('plantilla de piso', [TipoUsuario.ADMIN_SISTEMA], 
+    'Elimina una plantilla de piso del sistema. CUIDADO: Esta acción puede afectar buses que usen esta plantilla.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Delete(':id')
@@ -98,7 +116,10 @@ export class PlantillaPisosController {
     return await this.plantillaPisosService.eliminarPlantillaPiso(id);
   }
 
-  @ApiOperation({ summary: 'Hacer pública una plantilla de piso' })
+  @ApiOperation(
+    CommonDescriptions.changeState('plantilla de piso', 'PÚBLICA', [TipoUsuario.ADMIN_SISTEMA], 
+    'Hace pública una plantilla de piso para que esté disponible para todas las cooperativas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id/hacer-publica')
@@ -109,7 +130,10 @@ export class PlantillaPisosController {
     );
   }
 
-  @ApiOperation({ summary: 'Hacer privada una plantilla de piso' })
+  @ApiOperation(
+    CommonDescriptions.changeState('plantilla de piso', 'PRIVADA', [TipoUsuario.ADMIN_SISTEMA], 
+    'Hace privada una plantilla de piso restringiendo su acceso solo a cooperativas específicas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id/hacer-privada')

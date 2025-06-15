@@ -24,6 +24,7 @@ import {
   FiltroMetodoPagoDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroMetodoPagoBuild } from './utils/filtro-metodo-pago-build';
 
 @ApiTags('metodos-pago')
@@ -32,9 +33,13 @@ import { filtroMetodoPagoBuild } from './utils/filtro-metodo-pago-build';
 export class MetodosPagoController {
   constructor(private readonly metodosPagoService: MetodosPagoService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todos los métodos de pago de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('métodos de pago', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todos los métodos de pago de la cooperativa actual. Incluye efectivo, tarjetas, transferencias y otros medios habilitados.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -54,9 +59,10 @@ export class MetodosPagoController {
     return metodosPago;
   }
 
-  @ApiOperation({
-    summary: 'Obtener todos los métodos de pago activos (Público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('métodos de pago activos', 
+    'Lista todos los métodos de pago activos disponibles. Endpoint público útil para mostrar opciones de pago en aplicaciones cliente.')
+  )
   @Get('publico')
   async obtenerMetodosPagoPublico(@Query() filtro: FiltroMetodoPagoDto) {
     const filtroPublico = { ...filtro, activo: true };
@@ -68,9 +74,13 @@ export class MetodosPagoController {
     return metodosPago;
   }
 
-  @ApiOperation({
-    summary: 'Obtener métodos de pago de una cooperativa específica (Público)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener métodos de pago de una cooperativa específica',
+      description: 'Lista los métodos de pago activos de una cooperativa específica. Endpoint público que permite consultar opciones de pago por cooperativa.',
+      isPublic: true,
+    })
+  )
   @Get('cooperativa/:idCooperativa')
   async obtenerMetodosPagoDeUnaCooperativaPublico(
     @Param('idCooperativa', ParseIntPipe) idCooperativa: number,
@@ -85,17 +95,22 @@ export class MetodosPagoController {
     return metodosPago;
   }
 
-  @ApiOperation({
-    summary: 'Obtener método de pago por ID (público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('método de pago específico', 
+    'Obtiene los detalles de un método de pago por su ID. Incluye información de comisiones, límites y configuraciones.')
+  )
   @Get('publico/:id')
   async obtenerMetodoPagoPublico(@Param('id', ParseIntPipe) id: number) {
     return await this.metodosPagoService.obtenerMetodoPago({ id });
   }
 
-  @ApiOperation({
-    summary: 'Obtener método de pago por ID de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('método de pago', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de un método de pago de la cooperativa actual.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -113,7 +128,10 @@ export class MetodosPagoController {
     });
   }
 
-  @ApiOperation({ summary: 'Crear nuevo método de pago' })
+  @ApiOperation(
+    CommonDescriptions.create('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea un nuevo método de pago. Define tipos de pago, comisiones, límites y configuraciones específicas para la cooperativa.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
@@ -129,7 +147,10 @@ export class MetodosPagoController {
     return metodoPago;
   }
 
-  @ApiOperation({ summary: 'Actualizar método de pago' })
+  @ApiOperation(
+    CommonDescriptions.update('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza un método de pago existente. Permite modificar comisiones, límites, estado y configuraciones operativas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -145,7 +166,10 @@ export class MetodosPagoController {
     );
   }
 
-  @ApiOperation({ summary: 'Desactivar método de pago' })
+  @ApiOperation(
+    CommonDescriptions.changeState('método de pago', 'INACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Desactiva un método de pago. Los métodos inactivos no estarán disponibles para nuevas ventas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/desactivar')
@@ -159,7 +183,10 @@ export class MetodosPagoController {
     );
   }
 
-  @ApiOperation({ summary: 'Activar método de pago' })
+  @ApiOperation(
+    CommonDescriptions.changeState('método de pago', 'ACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Activa un método de pago. Los métodos activos estarán disponibles para usar en ventas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/activar')
@@ -173,7 +200,10 @@ export class MetodosPagoController {
     );
   }
 
-  @ApiOperation({ summary: 'Eliminar método de pago' })
+  @ApiOperation(
+    CommonDescriptions.delete('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Elimina un método de pago del sistema. CUIDADO: Esta acción puede afectar ventas existentes que usen este método.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')

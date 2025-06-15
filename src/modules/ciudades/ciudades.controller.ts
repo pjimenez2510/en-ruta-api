@@ -19,6 +19,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario } from '@prisma/client';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroCiudadBuild } from './utils/filtro-ciudad-build';
 import { FiltroCiudadDto, CreateCiudadDto, UpdateCiudadDto } from './dto';
 
@@ -28,7 +29,10 @@ import { FiltroCiudadDto, CreateCiudadDto, UpdateCiudadDto } from './dto';
 export class CiudadesController {
   constructor(private readonly ciudadesService: CiudadesService) {}
 
-  @ApiOperation({ summary: 'Obtener todas las ciudades' })
+  @ApiOperation(
+    CommonDescriptions.getPublic('ciudades', 
+    'Lista todas las ciudades disponibles en el sistema. Endpoint público que no requiere autenticación y permite filtros por nombre, código o estado.')
+  )
   @Get()
   async obtenerCiudades(@Query() filtro: FiltroCiudadDto) {
     const ciudades = await this.ciudadesService.obtenerCiudades(
@@ -37,14 +41,20 @@ export class CiudadesController {
     return ciudades;
   }
 
-  @ApiOperation({ summary: 'Obtener ciudad por ID' })
+  @ApiOperation(
+    CommonDescriptions.getPublic('ciudad específica', 
+    'Obtiene los detalles completos de una ciudad por su ID. Endpoint público que incluye información completa como nombre, código postal, departamento, etc.')
+  )
   @Get(':id')
   async obtenerCiudadPorId(@Param('id', ParseIntPipe) id: number) {
     const ciudad = await this.ciudadesService.obtenerCiudad({ id });
     return ciudad;
   }
 
-  @ApiOperation({ summary: 'Crear nueva ciudad' })
+  @ApiOperation(
+    CommonDescriptions.create('ciudad', [TipoUsuario.ADMIN_SISTEMA], 
+    'Crea una nueva ciudad en el sistema. Requiere nombre único, código postal y información del departamento. Solo administradores del sistema pueden crear ciudades.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Post()
@@ -54,7 +64,10 @@ export class CiudadesController {
     return ciudad;
   }
 
-  @ApiOperation({ summary: 'Actualizar ciudad' })
+  @ApiOperation(
+    CommonDescriptions.update('ciudad', [TipoUsuario.ADMIN_SISTEMA], 
+    'Actualiza la información de una ciudad existente. Permite modificar nombre, código postal y otros datos. Solo administradores del sistema pueden actualizar ciudades.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id')
@@ -69,7 +82,10 @@ export class CiudadesController {
     return ciudad;
   }
 
-  @ApiOperation({ summary: 'Desactivar ciudad' })
+  @ApiOperation(
+    CommonDescriptions.delete('ciudad', [TipoUsuario.ADMIN_SISTEMA], 
+    'Desactiva una ciudad del sistema. La ciudad no se elimina físicamente sino que se marca como inactiva para mantener integridad referencial. Solo administradores del sistema pueden desactivar ciudades.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Delete(':id')

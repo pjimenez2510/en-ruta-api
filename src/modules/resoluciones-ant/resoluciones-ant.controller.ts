@@ -18,6 +18,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario } from '@prisma/client';
 import { CreateResolucionAntDto, UpdateResolucionAntDto, FiltroResolucionAntDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroResolucionAntBuild } from './utils/filtro-resolucion-ant-build';
 
 @ApiTags('resoluciones-ant')
@@ -26,9 +27,13 @@ import { filtroResolucionAntBuild } from './utils/filtro-resolucion-ant-build';
 export class ResolucionesAntController {
   constructor(private readonly resolucionesAntService: ResolucionesAntService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todas las resoluciones ANT',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('resoluciones ANT', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todas las resoluciones de la Agencia Nacional de Tránsito. Incluye información de habilitaciones, permisos y regulaciones vigentes.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -43,9 +48,13 @@ export class ResolucionesAntController {
     return resoluciones;
   }
 
-  @ApiOperation({
-    summary: 'Obtener resolución ANT por ID',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('resolución ANT', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de una resolución ANT específica. Incluye número, fecha, vigencia y contenido.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -57,7 +66,10 @@ export class ResolucionesAntController {
     return await this.resolucionesAntService.obtenerResolucion({ id });
   }
 
-  @ApiOperation({ summary: 'Crear nueva resolución ANT' })
+  @ApiOperation(
+    CommonDescriptions.create('resolución ANT', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea una nueva resolución ANT en el sistema. Registra habilitaciones, permisos y documentos regulatorios oficiales.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
@@ -69,7 +81,10 @@ export class ResolucionesAntController {
     return resolucion;
   }
 
-  @ApiOperation({ summary: 'Actualizar resolución ANT' })
+  @ApiOperation(
+    CommonDescriptions.update('resolución ANT', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza una resolución ANT existente. Permite modificar información de vigencia, contenido y estado de la resolución.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -83,7 +98,10 @@ export class ResolucionesAntController {
     );
   }
 
-  @ApiOperation({ summary: 'Desactivar resolución ANT' })
+  @ApiOperation(
+    CommonDescriptions.changeState('resolución ANT', 'INACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Desactiva una resolución ANT. Las resoluciones inactivas no se consideran vigentes para operaciones.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/desactivar')
@@ -91,7 +109,10 @@ export class ResolucionesAntController {
     return await this.resolucionesAntService.desactivarResolucion(id);
   }
 
-  @ApiOperation({ summary: 'Activar resolución ANT' })
+  @ApiOperation(
+    CommonDescriptions.changeState('resolución ANT', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Activa una resolución ANT. Las resoluciones activas se consideran vigentes para las operaciones de transporte.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/activar')
