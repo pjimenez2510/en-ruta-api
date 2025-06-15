@@ -6,6 +6,7 @@ import { TenantsModule } from './modules/tenants/tenants.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfiguracionesTenantModule } from './modules/configuraciones-tenant/configuraciones-tenant.module';
 import { ClientesModule } from './modules/clientes/clientes.module';
 import { UsuarioTenantModule } from './modules/usuario-tenant/usuario-tenant.module';
@@ -25,12 +26,14 @@ import { ViajesModule } from './modules/viajes/viajes.module';
 import { VentasModule } from './modules/ventas/ventas.module';
 import { MetodosPagoModule } from './modules/metodos-pago/metodos-pago.module';
 import { ConfiguracionDescuentosModule } from './modules/configuracion-descuentos/configuracion-descuentos.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     TenantsModule,
@@ -54,6 +57,7 @@ import { ConfiguracionDescuentosModule } from './modules/configuracion-descuento
     VentasModule,
     MetodosPagoModule,
     ConfiguracionDescuentosModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

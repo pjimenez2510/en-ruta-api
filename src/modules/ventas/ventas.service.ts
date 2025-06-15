@@ -9,6 +9,7 @@ import { Prisma, EstadoPago, EstadoBoleto, TipoDescuentoCliente } from '@prisma/
 import { CreateVentaDto, UpdateVentaDto, FiltroVentaDto } from './dto';
 import { VENTA_SELECT_WITH_RELATIONS, VENTA_SELECT_WITH_FULL_RELATIONS } from './constants/venta-select';
 import { DescuentoCalculatorService } from './services/descuento-calculator.service';
+import { EmailService } from '../email/email.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class VentasService {
   constructor(
     private prisma: PrismaService,
     private descuentoCalculatorService: DescuentoCalculatorService,
+    private emailService: EmailService,
   ) {}
 
   async obtenerVentas(
@@ -319,10 +321,22 @@ export class VentasService {
       });
 
       // 12. Obtener venta completa para retornar
-      return await tx.venta.findUnique({
+      const ventaCompleta = await tx.venta.findUnique({
         where: { id: venta.id },
         select: VENTA_SELECT_WITH_FULL_RELATIONS,
       });
+
+      // 13. Enviar email de confirmación de forma asíncrona (no bloqueante)
+      setImmediate(async () => {
+        try {
+          await this.emailService.enviarConfirmacionVenta(venta.id);
+        } catch (error) {
+          // Log error but don't fail the transaction
+          console.error('Error enviando email de confirmación:', error);
+        }
+      });
+
+      return ventaCompleta;
     });
   }
 
@@ -367,10 +381,23 @@ export class VentasService {
         data: { estado: EstadoBoleto.CONFIRMADO },
       });
 
-      return await tx.venta.findUnique({
+      const ventaConfirmada = await tx.venta.findUnique({
         where: { id },
         select: VENTA_SELECT_WITH_FULL_RELATIONS,
       });
+
+      // Enviar emails de boletos individuales de forma asíncrona
+      setImmediate(async () => {
+        try {
+          for (const boleto of venta.boletos) {
+            await this.emailService.enviarBoleto(boleto.id);
+          }
+        } catch (error) {
+          console.error('Error enviando boletos por email:', error);
+        }
+      });
+
+      return ventaConfirmada;
     });
   }
 

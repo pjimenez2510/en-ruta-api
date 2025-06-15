@@ -7,10 +7,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, EstadoBoleto } from '@prisma/client';
 import { FiltroBoletoDto, UpdateBoletoDto } from './dto';
 import { BOLETO_SELECT_WITH_RELATIONS } from './constants/boleto-select';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class BoletosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   async obtenerBoletos(
     filtro: Prisma.BoletoWhereInput,
@@ -67,11 +71,24 @@ export class BoletosService {
       );
     }
 
-    return await this.prisma.boleto.update({
+    const boletoActualizado = await this.prisma.boleto.update({
       where: { id },
       data: datos,
       select: BOLETO_SELECT_WITH_RELATIONS,
     });
+
+    // Enviar notificación de cambio de estado por email
+    if (datos.estado) {
+      setImmediate(async () => {
+        try {
+          await this.emailService.enviarCambioEstadoBoleto(id, datos.estado);
+        } catch (error) {
+          console.error('Error enviando notificación de cambio de estado:', error);
+        }
+      });
+    }
+
+    return boletoActualizado;
   }
 
   async confirmarBoleto(id: number, tenantId: number) {

@@ -508,6 +508,7 @@ model Boleto {
   precioFinal         Decimal              @db.Decimal(10, 2)
   codigoAcceso        String               @unique
   estado              EstadoBoleto         @default(PENDIENTE)
+  recordatorioEnviado Boolean              @default(false)
 
   // Relaciones
   tenant        Tenant     @relation(fields: [tenantId], references: [id])
