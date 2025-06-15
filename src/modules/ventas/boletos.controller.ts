@@ -34,6 +34,8 @@ export class BoletosController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    RolUsuario.CONDUCTOR,
+    RolUsuario.AYUDANTE,
   )
   @Get()
   async obtenerBoletos(

@@ -4,11 +4,12 @@ import { VentasController } from './ventas.controller';
 import { BoletosController } from './boletos.controller';
 import { VentasService } from './ventas.service';
 import { BoletosService } from './boletos.service';
+import { DescuentoCalculatorService } from './services/descuento-calculator.service';
 
 @Module({
   imports: [PrismaModule],
   controllers: [VentasController, BoletosController],
-  providers: [VentasService, BoletosService],
-  exports: [VentasService, BoletosService],
+  providers: [VentasService, BoletosService, DescuentoCalculatorService],
+  exports: [VentasService, BoletosService, DescuentoCalculatorService],
 })
 export class VentasModule {} 

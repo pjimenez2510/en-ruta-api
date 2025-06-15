@@ -8,11 +8,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, EstadoPago, EstadoBoleto, TipoDescuentoCliente } from '@prisma/client';
 import { CreateVentaDto, UpdateVentaDto, FiltroVentaDto } from './dto';
 import { VENTA_SELECT_WITH_RELATIONS, VENTA_SELECT_WITH_FULL_RELATIONS } from './constants/venta-select';
+import { DescuentoCalculatorService } from './services/descuento-calculator.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class VentasService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private descuentoCalculatorService: DescuentoCalculatorService,
+  ) {}
 
   async obtenerVentas(
     filtro: Prisma.VentaWhereInput,
@@ -208,35 +212,27 @@ export class VentasService {
         const cliente = clientes.find(c => c.id === boletoDto.clienteId);
         const precioBase = precioSegmento * asiento.tipo.factorPrecio.toNumber();
         
-        // Calcular descuento
-        let porcentajeDescuento = 0;
-        const tipoDescuento = boletoDto.tipoDescuento || TipoDescuentoCliente.NINGUNO;
+        // Calcular descuento automáticamente basado en información del cliente
+        const informacionDescuento = await this.descuentoCalculatorService.calcularDescuentoAutomatico(
+          boletoDto.clienteId,
+          tenantId,
+        );
 
-        if (tipoDescuento !== TipoDescuentoCliente.NINGUNO) {
-          const configuracionDescuento = await tx.configuracionDescuento.findUnique({
-            where: {
-              tenantId_tipo: {
-                tenantId,
-                tipo: tipoDescuento === TipoDescuentoCliente.MENOR_EDAD ? 'MENOR_EDAD' :
-                      tipoDescuento === TipoDescuentoCliente.TERCERA_EDAD ? 'TERCERA_EDAD' :
-                      'DISCAPACIDAD',
-              },
-            },
-          });
+        // Si requiere validación, ejecutar validación
+        if (informacionDescuento.requiereValidacion) {
+          const validacion = await this.descuentoCalculatorService.validarRequisitosDescuento(
+            boletoDto.clienteId,
+            informacionDescuento.tipoDescuento,
+          );
 
-          if (configuracionDescuento && configuracionDescuento.activo) {
-            porcentajeDescuento = configuracionDescuento.porcentaje.toNumber();
-            
-            // Validaciones específicas para descuentos
-            if (tipoDescuento === TipoDescuentoCliente.DISCAPACIDAD && !cliente.esDiscapacitado) {
-              throw new BadRequestException(
-                `El cliente ${cliente.nombres} ${cliente.apellidos} no está registrado como discapacitado`,
-              );
-            }
+          if (!validacion.esValido) {
+            throw new BadRequestException(
+              `Error en descuento para cliente ${cliente.nombres} ${cliente.apellidos}: ${validacion.motivo}`,
+            );
           }
         }
 
-        const montoDescuento = (precioBase * porcentajeDescuento) / 100;
+        const montoDescuento = (precioBase * informacionDescuento.porcentajeDescuento) / 100;
         const precioFinal = precioBase - montoDescuento;
 
         totalSinDescuento += precioBase;
@@ -246,10 +242,11 @@ export class VentasService {
           clienteId: boletoDto.clienteId,
           asientoId: boletoDto.asientoId,
           precioBase,
-          tipoDescuento,
-          porcentajeDescuento,
+          tipoDescuento: informacionDescuento.tipoDescuento,
+          porcentajeDescuento: informacionDescuento.porcentajeDescuento,
           precioFinal,
           codigoAcceso: this.generarCodigoAcceso(),
+          descripcionDescuento: informacionDescuento.descripcion,
         });
       }
 
