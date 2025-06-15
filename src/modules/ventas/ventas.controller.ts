@@ -49,12 +49,15 @@ export class VentasController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    RolUsuario.CONDUCTOR,
+    RolUsuario.AYUDANTE,
   )
   @Get()
   async obtenerVentas(
     @Query() filtro: FiltroVentaDto,
     @TenantActual() tenantActual,
   ) {
+    
     const ventas = await this.ventasService.obtenerVentas(
       filtroVentaBuild(filtro, tenantActual.id),
     );
