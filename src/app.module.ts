@@ -21,6 +21,7 @@ import { ResolucionesAntModule } from './modules/resoluciones-ant/resoluciones-a
 import { RutasModule } from './modules/rutas/rutas.module';
 import { ParadasRutaModule } from './modules/paradas-ruta/paradas-ruta.module';
 import { HorariosRutaModule } from './modules/horarios-ruta/horarios-ruta.module';
+import { ViajesModule } from './modules/viajes/viajes.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { HorariosRutaModule } from './modules/horarios-ruta/horarios-ruta.module
     RutasModule,
     ParadasRutaModule,
     HorariosRutaModule,
+    ViajesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
