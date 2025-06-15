@@ -15,7 +15,6 @@ import { VIAJE_SELECT_WITH_RELATIONS } from '../constants/viaje-select';
 export class GeneracionViajesService {
   constructor(private prisma: PrismaService) {}
 
- 
   async previsualizarGeneracion(
     datos: GenerarViajesDto,
     tenantId: number,
@@ -117,6 +116,8 @@ export class GeneracionViajesService {
       );
 
       return viajesGenerados;
+    }, {
+      timeout: 15000, // Aumentar timeout a 15 segundos
     });
   }
 
@@ -182,9 +183,9 @@ export class GeneracionViajesService {
     guardar: boolean = false,
     tx?: Prisma.TransactionClient,
   ): Promise<ViajeGeneradoDto[]> {
-    const viajesGenerados: ViajeGeneradoDto[] = [];
     const prismaClient = tx || this.prisma;
 
+    // Generar array de fechas
     const fechas: Date[] = [];
     const fechaActual = new Date(datos.fechaInicio);
     const fechaFin = new Date(datos.fechaFin);
@@ -194,6 +195,7 @@ export class GeneracionViajesService {
       fechaActual.setDate(fechaActual.getDate() + 1);
     }
 
+    // Obtener viajes existentes para evitar duplicados
     const viajesExistentes = await prismaClient.viaje.findMany({
       where: {
         tenantId,
@@ -212,6 +214,13 @@ export class GeneracionViajesService {
       },
     });
 
+    // Crear un Set para búsqueda rápida de viajes existentes
+    const viajesExistentesSet = new Set(
+      viajesExistentes.map(
+        (ve) => `${ve.fecha.getTime()}-${ve.horarioRutaId}-${ve.busId}`
+      )
+    );
+
     const horariosOrdenados = [...horariosRuta].sort((a, b) => {
       if (a.ruta.nombre !== b.ruta.nombre) {
         return a.ruta.nombre.localeCompare(b.ruta.nombre);
@@ -219,6 +228,11 @@ export class GeneracionViajesService {
       return a.horaSalida.localeCompare(b.horaSalida);
     });
 
+    // Arrays para recopilar viajes
+    const viajesParaCrear: any[] = [];
+    const viajesParaPrevisualizar: ViajeGeneradoDto[] = [];
+
+    // Generar matriz de viajes
     for (let indiceFecha = 0; indiceFecha < fechas.length; indiceFecha++) {
       const fecha = fechas[indiceFecha];
       const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay(); 
@@ -228,78 +242,108 @@ export class GeneracionViajesService {
         const horario = horariosOrdenados[indiceHorario];
 
         if (horario.diasSemana && horario.diasSemana[posicionDia] === '1') {
-          
+          // Calcular bus asignado con rotación
           const indiceBusRotado = (indiceHorario + indiceFecha) % buses.length;
           const busAsignado = buses[indiceBusRotado];
 
-          const yaExiste = viajesExistentes.some(
-            (ve) =>
-              ve.fecha.getTime() === fecha.getTime() &&
-              ve.horarioRutaId === horario.id &&
-              ve.busId === busAsignado.id,
-          );
-
-          const viajeGenerado: ViajeGeneradoDto = {
-            id: null,
-            conductorId: null,
-            ayudanteId: null,
-            horaSalidaReal: null,
-            observaciones: null,
-            estado: EstadoViaje.PROGRAMADO,
-            capacidadTotal: busAsignado.totalAsientos,
-            generacion: TipoGeneracion.AUTOMATICA,
-            tenantId,
-            fecha,
-            horarioRuta: {
-              id: horario.id,
-              horaSalida: horario.horaSalida,
-              ruta: horario.ruta,
-            },
-            bus: busAsignado,
-            
-          };
+          // Verificar si ya existe
+          const claveViaje = `${fecha.getTime()}-${horario.id}-${busAsignado.id}`;
+          const yaExiste = viajesExistentesSet.has(claveViaje);
 
           if (!guardar) {
-            viajesGenerados.push(viajeGenerado);
-            continue;
-          }
-
-
-          if (guardar && !yaExiste) {
-            const viajeCreado = await prismaClient.viaje.create({
-              data: {
-                tenantId,
-                horarioRutaId: horario.id,
-                busId: busAsignado.id,
-                fecha,
-                estado: EstadoViaje.PROGRAMADO,
-                capacidadTotal: busAsignado.totalAsientos,
-                asientosOcupados: 0,
-                generacion: TipoGeneracion.AUTOMATICA,
+            // Modo previsualización
+            const viajeGenerado: ViajeGeneradoDto = {
+              id: null,
+              conductorId: null,
+              ayudanteId: null,
+              horaSalidaReal: null,
+              observaciones: null,
+              estado: EstadoViaje.PROGRAMADO,
+              capacidadTotal: busAsignado.totalAsientos,
+              generacion: TipoGeneracion.AUTOMATICA,
+              tenantId,
+              fecha,
+              horarioRuta: {
+                id: horario.id,
+                horaSalida: horario.horaSalida,
+                ruta: horario.ruta,
               },
-              select: {
-                ...VIAJE_SELECT_WITH_RELATIONS,
-              }
+              bus: busAsignado,
+            };
+            viajesParaPrevisualizar.push(viajeGenerado);
+          } else if (!yaExiste) {
+            // Modo guardar - recopilar para inserción masiva
+            viajesParaCrear.push({
+              tenantId,
+              horarioRutaId: horario.id,
+              busId: busAsignado.id,
+              fecha,
+              estado: EstadoViaje.PROGRAMADO,
+              capacidadTotal: busAsignado.totalAsientos,
+              asientosOcupados: 0,
+              generacion: TipoGeneracion.AUTOMATICA,
             });
-            viajesGenerados.push(viajeCreado as unknown as ViajeGeneradoDto);
           }
-
-          
         }
       }
     }
 
-    return viajesGenerados.sort((a, b) => {
-      if (a.fecha.getTime() !== b.fecha.getTime()) {
-        return a.fecha.getTime() - b.fecha.getTime();
-      }
-      if (a.horarioRuta.ruta.nombre !== b.horarioRuta.ruta.nombre) {
-        return a.horarioRuta.ruta.nombre.localeCompare(b.horarioRuta.ruta.nombre);
+    // Si es previsualización, retornar los viajes generados
+    if (!guardar) {
+      return viajesParaPrevisualizar.sort((a, b) => {
+        if (a.fecha.getTime() !== b.fecha.getTime()) {
+          return a.fecha.getTime() - b.fecha.getTime();
+        }
+        if (a.horarioRuta.ruta.nombre !== b.horarioRuta.ruta.nombre) {
+          return a.horarioRuta.ruta.nombre.localeCompare(b.horarioRuta.ruta.nombre);
+        }
+        return a.horarioRuta.horaSalida.localeCompare(b.horarioRuta.horaSalida);
+      });
+    }
+
+    // Inserción masiva de viajes
+    if (viajesParaCrear.length > 0) {
+      // Procesar por lotes para evitar problemas con muchos registros
+      const BATCH_SIZE = 100;
+      
+      for (let i = 0; i < viajesParaCrear.length; i += BATCH_SIZE) {
+        const batch = viajesParaCrear.slice(i, i + BATCH_SIZE);
+        await prismaClient.viaje.createMany({
+          data: batch,
+          skipDuplicates: true,
+        });
       }
 
-      return a.horarioRuta.horaSalida.localeCompare(b.horarioRuta.horaSalida);
-    });
+      // Obtener los viajes creados con sus relaciones
+      const viajesCreados = await prismaClient.viaje.findMany({
+        where: {
+          tenantId,
+          fecha: {
+            gte: datos.fechaInicio,
+            lte: datos.fechaFin,
+          },
+          horarioRutaId: {
+            in: horariosRuta.map((h) => h.id),
+          },
+          busId: {
+            in: buses.map((b) => b.id),
+          },
+          generacion: TipoGeneracion.AUTOMATICA,
+        },
+        select: {
+          ...VIAJE_SELECT_WITH_RELATIONS,
+        },
+        orderBy: [
+          { fecha: 'asc' },
+          { horarioRuta: { ruta: { nombre: 'asc' } } },
+          { horarioRuta: { horaSalida: 'asc' } },
+        ],
+      });
+
+      return viajesCreados as unknown as ViajeGeneradoDto[];
+    }
+
+    // Si no hay viajes para crear, retornar array vacío
+    return [];
   }
-
-
 }
