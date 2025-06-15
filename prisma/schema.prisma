@@ -323,7 +323,6 @@ model Ruta {
   resolucion    ResolucionANT @relation(fields: [resolucionId], references: [id])
   paradas       ParadaRuta[] // Paradas intermedias ordenadas
   horarios      HorarioRuta[] // Horarios de salida de la ruta
-  viajes        Viaje[] // Instancias específicas de la ruta
 
   @@unique([tenantId, nombre])
   @@index([tenantId]) // Índice para búsquedas eficientes
@@ -377,13 +376,12 @@ model HorarioRuta {
 model Viaje {
   id               Int            @id @default(autoincrement())
   tenantId         Int
-  rutaId           Int
   horarioRutaId    Int
   busId            Int
   conductorId      Int?
   ayudanteId       Int?
   fecha            DateTime       @db.Date
-  horaSalidaReal   DateTime // Hora específica del viaje
+  horaSalidaReal   DateTime? // Hora específica del viaje
   estado           EstadoViaje    @default(PROGRAMADO)
   observaciones    String?
   capacidadTotal   Int // Cache del total de asientos
@@ -392,7 +390,6 @@ model Viaje {
 
   // Relaciones
   tenant      Tenant         @relation(fields: [tenantId], references: [id])
-  ruta        Ruta           @relation(fields: [rutaId], references: [id])
   horarioRuta HorarioRuta    @relation(fields: [horarioRutaId], references: [id])
   bus         Bus            @relation(fields: [busId], references: [id])
   conductor   UsuarioTenant? @relation("ViajesConductor", fields: [conductorId], references: [id])
@@ -402,9 +399,9 @@ model Viaje {
   ventas      Venta[]
   ocupaciones OcupacionAsiento[] // Gestión eficiente de ocupación por segmentos
 
-  @@unique([rutaId, fecha, horarioRutaId, busId])
+  @@unique([horarioRutaId, fecha, busId])
   @@index([tenantId, fecha, estado])
-  @@index([fecha, rutaId, estado]) // Para búsquedas de disponibilidad
+  @@index([fecha, horarioRutaId, estado]) // Para búsquedas de disponibilidad
   @@map("viajes")
 }
 
