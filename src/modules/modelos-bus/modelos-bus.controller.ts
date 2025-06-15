@@ -23,6 +23,7 @@ import {
   FiltroModeloBusDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroModeloBusBuild } from './utils/filtro-modelo-bus-build';
 
 @ApiTags('modelos-bus')
@@ -32,7 +33,10 @@ import { filtroModeloBusBuild } from './utils/filtro-modelo-bus-build';
 export class ModelosBusController {
   constructor(private readonly modelosBusService: ModelosBusService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los modelos de bus' })
+  @ApiOperation(
+    CommonDescriptions.getAll('modelos de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Lista todos los modelos de bus disponibles en el sistema. Incluye información de marca, capacidad, características y plantillas de asientos.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get()
   async obtenerModelosBus(@Query() filtro: FiltroModeloBusDto) {
@@ -42,7 +46,10 @@ export class ModelosBusController {
     return modelosBus;
   }
 
-  @ApiOperation({ summary: 'Obtener un modelo de bus por ID' })
+  @ApiOperation(
+    CommonDescriptions.getById('modelo de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Obtiene los detalles completos de un modelo de bus específico incluyendo especificaciones técnicas y configuraciones disponibles.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get(':id')
   async obtenerModeloBusPorId(@Param('id', ParseIntPipe) id: number) {
@@ -50,7 +57,10 @@ export class ModelosBusController {
     return modeloBus;
   }
 
-  @ApiOperation({ summary: 'Crear un nuevo modelo de bus' })
+  @ApiOperation(
+    CommonDescriptions.create('modelo de bus', [TipoUsuario.ADMIN_SISTEMA], 
+    'Crea un nuevo modelo de bus en el sistema. Solo administradores del sistema pueden crear modelos que estarán disponibles para todas las cooperativas.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -60,7 +70,10 @@ export class ModelosBusController {
     return modeloBus;
   }
 
-  @ApiOperation({ summary: 'Actualizar un modelo de bus' })
+  @ApiOperation(
+    CommonDescriptions.update('modelo de bus', [TipoUsuario.ADMIN_SISTEMA], 
+    'Actualiza un modelo de bus existente. Solo administradores del sistema pueden modificar modelos de bus.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Put(':id')
   async actualizarModeloBus(
@@ -74,7 +87,10 @@ export class ModelosBusController {
     return modeloBus;
   }
 
-  @ApiOperation({ summary: 'Eliminar un modelo de bus' })
+  @ApiOperation(
+    CommonDescriptions.delete('modelo de bus', [TipoUsuario.ADMIN_SISTEMA], 
+    'Elimina un modelo de bus del sistema. CUIDADO: Esta acción puede afectar buses existentes que usen este modelo.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Delete(':id')
   async eliminarModeloBus(@Param('id', ParseIntPipe) id: number) {

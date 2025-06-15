@@ -24,6 +24,7 @@ import {
   FiltroConfiguracionesTenantDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroConfiguracionesTenantBuild } from './utils/filtro-configuraciones-tenant-build';
 
 @ApiTags('configuraciones-tenant')
@@ -35,7 +36,10 @@ export class ConfiguracionesTenantController {
     private readonly configuracionesTenantService: ConfiguracionesTenantService,
   ) {}
 
-  @ApiOperation({ summary: 'Obtener todas las configuraciones del tenant' })
+  @ApiOperation(
+    CommonDescriptions.getAll('configuraciones', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Lista todas las configuraciones de la cooperativa actual. Incluye parámetros operativos, límites, políticas y ajustes personalizados.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get()
   async obtenerConfiguraciones(
@@ -51,7 +55,10 @@ export class ConfiguracionesTenantController {
     return configuraciones;
   }
 
-  @ApiOperation({ summary: 'Obtener una configuración por ID' })
+  @ApiOperation(
+    CommonDescriptions.getById('configuración', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Obtiene los detalles de una configuración específica de la cooperativa. Incluye valor actual, tipo de dato y descripción.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get(':id')
   async obtenerConfiguracionPorId(
@@ -66,7 +73,13 @@ export class ConfiguracionesTenantController {
     return configuracion;
   }
 
-  @ApiOperation({ summary: 'Crear una nueva configuración' })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Crear nueva configuración personalizada',
+      description: 'Crea una nueva configuración específica para la cooperativa. Permite definir parámetros operativos personalizados según las necesidades del negocio.',
+      roles: [RolUsuario.ADMIN_COOPERATIVA],
+    })
+  )
   @Roles(RolUsuario.ADMIN_COOPERATIVA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -83,7 +96,10 @@ export class ConfiguracionesTenantController {
     return configuracion;
   }
 
-  @ApiOperation({ summary: 'Actualizar una configuración' })
+  @ApiOperation(
+    CommonDescriptions.update('configuración', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza el valor de una configuración existente. Los cambios pueden afectar el comportamiento operativo de la cooperativa.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
   async actualizarConfiguracion(
@@ -106,7 +122,10 @@ export class ConfiguracionesTenantController {
     return configuracion;
   }
 
-  @ApiOperation({ summary: 'Eliminar una configuración' })
+  @ApiOperation(
+    CommonDescriptions.delete('configuración', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Elimina una configuración personalizada de la cooperativa. CUIDADO: Esto puede afectar funcionalidades que dependan de esta configuración.')
+  )
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')
   async eliminarConfiguracion(

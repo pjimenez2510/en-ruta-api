@@ -22,6 +22,7 @@ import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { UsuarioActual } from '../../common/decorators/usuario-actual.decorator';
 import { CreateTenantDto, UpdateTenantDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { FiltroTenantDto } from './dto/filtro-tenant.dto';
 import { filtroTenantBuild } from './utils/filtro-tenant-build';
 
@@ -31,7 +32,10 @@ import { filtroTenantBuild } from './utils/filtro-tenant-build';
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los tenants' })
+  @ApiOperation(
+    CommonDescriptions.getPublic('cooperativas', 
+    'Lista todas las cooperativas registradas en el sistema. Endpoint público que muestra información básica de las cooperativas activas.')
+  )
   @Get()
   async obtenerTenants(@Query() filtro: FiltroTenantDto) {
     const tenants = await this.tenantsService.obtenerTenants(
@@ -40,7 +44,10 @@ export class TenantsController {
     return tenants;
   }
 
-  @ApiOperation({ summary: 'Obtener tenant por ID' })
+  @ApiOperation(
+    CommonDescriptions.getById('cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Obtiene los detalles completos de una cooperativa por su ID. Los administradores de cooperativa solo pueden ver su propia información.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Get(':id')
@@ -49,7 +56,10 @@ export class TenantsController {
     return tenant;
   }
 
-  @ApiOperation({ summary: 'Crear nuevo tenant' })
+  @ApiOperation(
+    CommonDescriptions.create('cooperativa', [TipoUsuario.ADMIN_SISTEMA], 
+    'Crea una nueva cooperativa en el sistema. Solo administradores del sistema pueden crear cooperativas. Incluye configuración inicial completa.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Post()
@@ -59,7 +69,13 @@ export class TenantsController {
     return tenant;
   }
 
-  @ApiOperation({ summary: 'Actualizar tenant' })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Actualizar información de cooperativa',
+      description: 'Actualiza la información de una cooperativa. Los administradores del sistema pueden actualizar cualquier cooperativa, mientras que los administradores de cooperativa solo pueden actualizar su propia información.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -89,7 +105,13 @@ export class TenantsController {
     return tenant;
   }
 
-  @ApiOperation({ summary: 'Desactivar tenant' })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Desactivar una cooperativa',
+      description: 'Desactiva una cooperativa del sistema. Solo administradores del sistema pueden desactivar cooperativas. Las cooperativas desactivadas no podrán operar.',
+      roles: [TipoUsuario.ADMIN_SISTEMA],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA)
   @Delete(':id')

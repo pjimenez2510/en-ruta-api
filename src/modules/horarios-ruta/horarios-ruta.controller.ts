@@ -25,6 +25,7 @@ import {
   FiltroHorarioRutaDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroHorarioRutaBuild } from './utils/filtro-horario-ruta-build';
 
 @ApiTags('horarios-ruta')
@@ -33,9 +34,13 @@ import { filtroHorarioRutaBuild } from './utils/filtro-horario-ruta-build';
 export class HorariosRutaController {
   constructor(private readonly horariosRutaService: HorariosRutaService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todos los horarios de ruta de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('horarios de ruta', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todos los horarios de ruta de la cooperativa actual. Incluye horarios de salida, llegada, frecuencias y días de operación.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -55,10 +60,10 @@ export class HorariosRutaController {
     return horariosRuta;
   }
 
-  @ApiOperation({
-    summary:
-      'Obtener todos los horarios de ruta de todas las cooperativas (Público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('horarios de ruta', 
+    'Lista todos los horarios de ruta de todas las cooperativas. Endpoint público útil para mostrar horarios disponibles en aplicaciones cliente.')
+  )
   @Get('publico')
   async obtenerHorariosRutaPublico(@Query() filtro: FiltroHorarioRutaDto) {
     const horariosRuta = await this.horariosRutaService.obtenerHorariosRuta(
@@ -69,9 +74,13 @@ export class HorariosRutaController {
     return horariosRuta;
   }
 
-  @ApiOperation({
-    summary: 'Obtener horarios de ruta de una cooperativa específica (Público)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener horarios de una cooperativa específica',
+      description: 'Lista los horarios de ruta de una cooperativa específica. Endpoint público que permite consultar horarios por cooperativa.',
+      isPublic: true,
+    })
+  )
   @Get('cooperativa/:idCooperativa')
   async obtenerHorariosRutaDeUnaCooperativaPublico(
     @Param('idCooperativa', ParseIntPipe) idCooperativa: number,
@@ -85,17 +94,22 @@ export class HorariosRutaController {
     return horariosRuta;
   }
 
-  @ApiOperation({
-    summary: 'Obtener horario de ruta por ID (público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('horario de ruta específico', 
+    'Obtiene los detalles completos de un horario de ruta por su ID. Incluye horarios, frecuencias y configuraciones.')
+  )
   @Get('publico/:id')
   async obtenerHorarioRutaPublico(@Param('id', ParseIntPipe) id: number) {
     return await this.horariosRutaService.obtenerHorarioRuta({ id });
   }
 
-  @ApiOperation({
-    summary: 'Obtener horario de ruta por ID de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('horario de ruta', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de un horario de ruta de la cooperativa actual.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -113,7 +127,10 @@ export class HorariosRutaController {
     });
   }
 
-  @ApiOperation({ summary: 'Crear nuevo horario de ruta' })
+  @ApiOperation(
+    CommonDescriptions.create('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea un nuevo horario de ruta. Define los horarios de salida, llegada y configuraciones de frecuencia para una ruta específica.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
@@ -126,7 +143,10 @@ export class HorariosRutaController {
     return horarioRuta;
   }
 
-  @ApiOperation({ summary: 'Actualizar horario de ruta' })
+  @ApiOperation(
+    CommonDescriptions.update('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza un horario de ruta existente. Permite modificar horarios, frecuencias y configuraciones operativas.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -142,7 +162,10 @@ export class HorariosRutaController {
     );
   }
 
-  @ApiOperation({ summary: 'Desactivar horario de ruta' })
+  @ApiOperation(
+    CommonDescriptions.changeState('horario de ruta', 'INACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Desactiva un horario de ruta. Los horarios inactivos no se usarán para la generación automática de viajes.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/desactivar')
@@ -153,7 +176,10 @@ export class HorariosRutaController {
     return await this.horariosRutaService.desactivarHorarioRuta(id, tenantActual.id);
   }
 
-  @ApiOperation({ summary: 'Activar horario de ruta' })
+  @ApiOperation(
+    CommonDescriptions.changeState('horario de ruta', 'ACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Activa un horario de ruta. Los horarios activos se usarán para la generación automática de viajes.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id/activar')
@@ -165,7 +191,10 @@ export class HorariosRutaController {
     return await this.horariosRutaService.activarHorarioRuta(id, tenantActual.id);
   }
 
-  @ApiOperation({ summary: 'Eliminar horario de ruta' })
+  @ApiOperation(
+    CommonDescriptions.delete('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Elimina un horario de ruta del sistema. CUIDADO: Esta acción puede afectar la generación de viajes automáticos.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')

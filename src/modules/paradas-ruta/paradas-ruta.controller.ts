@@ -21,6 +21,7 @@ import { TipoUsuario, RolUsuario } from '@prisma/client';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { CreateParadaRutaDto, UpdateParadaRutaDto, FiltroParadaRutaDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 import { filtroParadaRutaBuild } from './utils/filtro-parada-ruta-build';
 
 @ApiTags('paradas-ruta')
@@ -29,9 +30,13 @@ import { filtroParadaRutaBuild } from './utils/filtro-parada-ruta-build';
 export class ParadasRutaController {
   constructor(private readonly paradasRutaService: ParadasRutaService) {}
 
-  @ApiOperation({
-    summary: 'Obtener todas las paradas de ruta de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getAll('paradas de ruta', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Lista todas las paradas de ruta de la cooperativa actual. Incluye ubicación, orden y configuraciones de cada parada.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -49,9 +54,10 @@ export class ParadasRutaController {
     return paradasRuta;
   }
 
-  @ApiOperation({
-    summary: 'Obtener todas las paradas de ruta (Público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('paradas de ruta', 
+    'Lista todas las paradas de ruta disponibles. Endpoint público útil para mostrar paradas y ubicaciones en aplicaciones cliente.')
+  )
   @Get('publico')
   async obtenerParadasRutaPublico(@Query() filtro: FiltroParadaRutaDto) {
     const paradasRuta = await this.paradasRutaService.obtenerParadasRuta(
@@ -60,9 +66,13 @@ export class ParadasRutaController {
     return paradasRuta;
   }
 
-  @ApiOperation({
-    summary: 'Obtener paradas de una ruta específica (Público)',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener paradas de una ruta específica',
+      description: 'Lista todas las paradas de una ruta específica en orden secuencial. Endpoint público útil para mostrar el recorrido completo de una ruta.',
+      isPublic: true,
+    })
+  )
   @Get('publico/ruta/:rutaId')
   async obtenerParadasPorRutaPublico(
     @Param('rutaId', ParseIntPipe) rutaId: number,
@@ -70,17 +80,22 @@ export class ParadasRutaController {
     return await this.paradasRutaService.obtenerParadasPorRuta(rutaId);
   }
 
-  @ApiOperation({
-    summary: 'Obtener parada de ruta por ID (público)',
-  })
+  @ApiOperation(
+    CommonDescriptions.getPublic('parada de ruta específica', 
+    'Obtiene los detalles de una parada de ruta por su ID. Incluye ubicación, horarios estimados y información de la ciudad.')
+  )
   @Get('publico/:id')
   async obtenerParadaRutaPublico(@Param('id', ParseIntPipe) id: number) {
     return await this.paradasRutaService.obtenerParadaRuta({ id });
   }
 
-  @ApiOperation({
-    summary: 'Obtener parada de ruta por ID de la cooperativa actual',
-  })
+  @ApiOperation(
+    CommonDescriptions.getById('parada de ruta', [
+      TipoUsuario.ADMIN_SISTEMA,
+      RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
+    ], 'Obtiene los detalles completos de una parada de ruta de la cooperativa actual.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -97,9 +112,17 @@ export class ParadasRutaController {
     return paradaRuta;
   }
 
-  @ApiOperation({
-    summary: 'Obtener paradas de una ruta específica de la cooperativa actual',
-  })
+  @ApiOperation(
+    createApiOperation({
+      summary: 'Obtener paradas de una ruta de la cooperativa',
+      description: 'Lista todas las paradas de una ruta específica de la cooperativa actual en orden secuencial. Incluye información detallada de cada parada.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    })
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
@@ -114,7 +137,10 @@ export class ParadasRutaController {
     return await this.paradasRutaService.obtenerParadasPorRuta(rutaId, tenantActual.id);
   }
 
-  @ApiOperation({ summary: 'Crear nueva parada de ruta' })
+  @ApiOperation(
+    CommonDescriptions.create('parada de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Crea una nueva parada en una ruta. Define la ubicación, orden secuencial y configuraciones específicas de la parada.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Post()
@@ -130,7 +156,10 @@ export class ParadasRutaController {
     return paradaRuta;
   }
 
-  @ApiOperation({ summary: 'Actualizar parada de ruta' })
+  @ApiOperation(
+    CommonDescriptions.update('parada de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Actualiza una parada de ruta existente. Permite modificar ubicación, orden, horarios estimados y configuraciones.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Put(':id')
@@ -146,7 +175,10 @@ export class ParadasRutaController {
     );
   }
 
-  @ApiOperation({ summary: 'Eliminar parada de ruta' })
+  @ApiOperation(
+    CommonDescriptions.delete('parada de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    'Elimina una parada de ruta del sistema. CUIDADO: Esta acción puede afectar viajes existentes que usen esta ruta.')
+  )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
   @Delete(':id')

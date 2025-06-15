@@ -25,6 +25,7 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
+import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
 
 @ApiTags('auth')
 @Controller('auth')
