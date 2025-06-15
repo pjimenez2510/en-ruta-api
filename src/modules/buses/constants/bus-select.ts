@@ -33,3 +33,60 @@ export const BUS_SELECT_WITH_RELATIONS: Prisma.BusSelect = {
     },
   },
 };
+
+export type BusWithPisosAndAsientos = Prisma.BusGetPayload<{
+  select: typeof BUS_SELECT_WITH_PISOS_AND_ASIENTOS;
+}>;
+
+export const BUS_SELECT_WITH_PISOS_AND_ASIENTOS: Prisma.BusSelect = {
+  ...BUS_SELECT,
+  tenant: {
+    select: {
+      id: true,
+      nombre: true,
+    },
+  },
+  modeloBus: {
+    select: {
+      id: true,
+      marca: true,
+      modelo: true,
+      tipoChasis: true,
+      tipoCarroceria: true,
+      numeroPisos: true,
+    },
+  },
+  pisos: {
+    select: {
+      id: true,
+      numeroPiso: true,
+      asientos: {
+        select: {
+          id: true,
+          numero: true,
+          fila: true,
+          columna: true,
+          estado: true,
+          notas: true,
+          tipo: {
+            select: {
+              id: true,
+              nombre: true,
+              descripcion: true,
+              factorPrecio: true,
+              color: true,
+              icono: true,
+            },
+          },
+        },
+        orderBy: [
+          { fila: 'asc' },
+          { columna: 'asc' },
+        ],
+      },
+    },
+    orderBy: {
+      numeroPiso: 'asc',
+    },
+  },
+};

@@ -18,7 +18,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario, EstadoBus } from '@prisma/client';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
-import { CreateBusDto, UpdateBusDto, FiltroBusDto } from './dto';
+import { CreateBusDto, UpdateBusDto, FiltroBusDto, ConsultaDisponibilidadBusDto } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { filtroBusBuild } from './utils/filtro-bus-build';
 
@@ -70,6 +70,22 @@ export class BusesController {
       tenantId: idCooperativa,
     });
     return buses;
+  }
+
+  @ApiOperation({
+    summary: 'Consultar disponibilidad de asientos de un bus en un viaje específico (público)',
+  })
+  @Get(':id/disponibilidad')
+  async consultarDisponibilidadBus(
+    @Param('id', ParseIntPipe) busId: number,
+    @Query() consulta: ConsultaDisponibilidadBusDto,
+  ) {
+    return await this.busesService.obtenerBusConDisponibilidad(
+      busId,
+      consulta.viajeId,
+      consulta.ciudadOrigenId,
+      consulta.ciudadDestinoId,
+    );
   }
 
   @ApiOperation({
