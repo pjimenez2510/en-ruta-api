@@ -6,10 +6,8 @@ import {
   IsArray,
   ValidateNested,
   ArrayMinSize,
-  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { TipoDescuentoCliente } from '@prisma/client';
 
 export class CreateBoletoDto {
   @ApiProperty({
@@ -27,17 +25,6 @@ export class CreateBoletoDto {
   @IsInt({ message: 'El ID del asiento debe ser un número entero' })
   @IsNotEmpty({ message: 'El ID del asiento es requerido' })
   asientoId: number;
-
-  @ApiPropertyOptional({
-    description: 'Tipo de descuento aplicado',
-    enum: TipoDescuentoCliente,
-    default: TipoDescuentoCliente.NINGUNO,
-  })
-  @IsOptional()
-  @IsEnum(TipoDescuentoCliente, {
-    message: 'El tipo de descuento debe ser un valor válido',
-  })
-  tipoDescuento?: TipoDescuentoCliente;
 }
 
 export class CreateVentaDto {

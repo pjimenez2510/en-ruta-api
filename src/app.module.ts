@@ -23,6 +23,8 @@ import { ParadasRutaModule } from './modules/paradas-ruta/paradas-ruta.module';
 import { HorariosRutaModule } from './modules/horarios-ruta/horarios-ruta.module';
 import { ViajesModule } from './modules/viajes/viajes.module';
 import { VentasModule } from './modules/ventas/ventas.module';
+import { MetodosPagoModule } from './modules/metodos-pago/metodos-pago.module';
+import { ConfiguracionDescuentosModule } from './modules/configuracion-descuentos/configuracion-descuentos.module';
 
 @Module({
   imports: [
@@ -50,6 +52,8 @@ import { VentasModule } from './modules/ventas/ventas.module';
     HorariosRutaModule,
     ViajesModule,
     VentasModule,
+    MetodosPagoModule,
+    ConfiguracionDescuentosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
