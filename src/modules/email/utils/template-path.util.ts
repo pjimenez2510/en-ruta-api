@@ -7,24 +7,14 @@ export class TemplatePathUtil {
    * Funciona tanto en desarrollo como en producción
    */
   static getTemplatesDirectory(): string {
-    const isProduction = process.env.NODE_ENV === 'production';
     
-    const possiblePaths = isProduction ? [
-      // En producción, priorizar rutas compiladas
+    const possiblePaths = [
       join(process.cwd(), 'dist', 'modules', 'email', 'templates'),
       join(__dirname, '..', 'templates'),
       join(process.cwd(), 'dist', 'src', 'modules', 'email', 'templates'),
-      // Fallback a desarrollo solo si no encuentra en dist
       join(process.cwd(), 'src', 'modules', 'email', 'templates'),
       join(process.cwd(), 'templates'),
-    ] : [
-      // En desarrollo, priorizar ruta de código fuente
-      join(process.cwd(), 'src', 'modules', 'email', 'templates'),
-      join(process.cwd(), 'dist', 'modules', 'email', 'templates'),
-      join(__dirname, '..', 'templates'),
-      join(process.cwd(), 'dist', 'src', 'modules', 'email', 'templates'),
-      join(process.cwd(), 'templates'),
-    ];
+    ]
 
     for (const path of possiblePaths) {
       if (existsSync(path)) {
@@ -33,7 +23,6 @@ export class TemplatePathUtil {
       }
     }
 
-    // Si ninguna ruta existe, usar la primera como fallback y loggear el error
     const fallbackPath = possiblePaths[0];
     console.error(`[TemplatePathUtil] No se encontró directorio de plantillas válido. Usando fallback: ${fallbackPath}`);
     console.error(`[TemplatePathUtil] Rutas verificadas:`, possiblePaths);
