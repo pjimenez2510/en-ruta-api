@@ -1,7 +1,7 @@
-import { Ciudad } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
-export const ciudades = [
+export const ciudades: Prisma.CiudadCreateInput[] = [
   // PROVINCIA DE PICHINCHA
   {
     nombre: 'Quito',
