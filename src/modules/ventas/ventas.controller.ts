@@ -14,6 +14,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { VentasService } from './ventas.service';
+import { DescuentoCalculatorService } from './services/descuento-calculator.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -21,11 +22,13 @@ import { TipoUsuario, RolUsuario, EstadoPago } from '@prisma/client';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
 import { UsuarioActual } from '../../common/decorators/usuario-actual.decorator';
 import { CreateVentaDto, UpdateVentaDto, FiltroVentaDto } from './dto';
+import { DescuentoAplicableDto } from './dto/consulta-descuento.dto';
 import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { filtroVentaBuild } from './utils/filtro-venta-build';
 
@@ -33,7 +36,10 @@ import { filtroVentaBuild } from './utils/filtro-venta-build';
 @ApiBearerAuth()
 @Controller('ventas')
 export class VentasController {
-  constructor(private readonly ventasService: VentasService) {}
+  constructor(
+    private readonly ventasService: VentasService,
+    private readonly descuentoCalculatorService: DescuentoCalculatorService,
+  ) {}
 
   @ApiOperation({
     summary: 'Obtener todas las ventas de la cooperativa actual',
@@ -278,5 +284,40 @@ export class VentasController {
       filtroVentaBuild({ ...filtro, usuarioId: usuarioActual.id }),
     );
     return ventas;
+  }
+
+  @ApiOperation({
+    summary: 'Consultar descuentos aplicables para un cliente específico',
+    description:
+      'Calcula automáticamente qué descuentos se aplicarían a un cliente basándose en su edad, discapacidad y configuraciones del tenant',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Información del descuento aplicable',
+    type: DescuentoAplicableDto,
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('descuentos/cliente/:clienteId')
+  async consultarDescuentosCliente(
+    @Param('clienteId', ParseIntPipe) clienteId: number,
+    @TenantActual() tenantActual,
+  ): Promise<DescuentoAplicableDto> {
+    const informacionDescuento =
+      await this.descuentoCalculatorService.calcularDescuentoAutomatico(
+        clienteId,
+        tenantActual.id,
+      );
+
+    const validacion =
+      await this.descuentoCalculatorService.validarRequisitosDescuento(
+        clienteId,
+        informacionDescuento.tipoDescuento,
+      );
+
+    return {
+      ...informacionDescuento,
+      validacion,
+      mensaje: `Descuento aplicable: ${informacionDescuento.descripcion}`,
+    };
   }
 }
