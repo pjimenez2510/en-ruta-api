@@ -24,3 +24,5 @@ export const RUTA_SELECT_WITH_RELATIONS: Prisma.RutaSelect = {
     },
   },
 };
+
+

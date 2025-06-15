@@ -19,3 +19,14 @@ export const PARADA_RUTA_SELECT_WITH_RELATIONS: Prisma.ParadaRutaSelect = {
     },
   },
 }; 
+
+export const PARADA_RUTA_SELECT_WITH_RELATIONS_WITH_CIUDAD: Prisma.ParadaRutaSelect = {
+  id: true,
+  orden: true,
+  ciudad: {
+    select: {
+      id: true,
+      nombre: true,
+    },
+  },
+};
