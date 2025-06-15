@@ -34,6 +34,7 @@ export class ClientesController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    TipoUsuario.CLIENTE
   )
   async obtenerClientes(@Query() filtro: FiltroClienteDto) {
     const clientes = await this.clientesService.obtenerClientes(
@@ -48,6 +49,7 @@ export class ClientesController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    TipoUsuario.CLIENTE
   )
   async obtenerClientePorId(@Param('id', ParseIntPipe) id: number) {
     const cliente = await this.clientesService.obtenerCliente({ id });
@@ -61,6 +63,7 @@ export class ClientesController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    TipoUsuario.CLIENTE
   )
   async crearCliente(@Body() createClienteDto: CreateClienteDto) {
     const cliente = await this.clientesService.crearCliente(createClienteDto);
@@ -73,6 +76,7 @@ export class ClientesController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    TipoUsuario.CLIENTE
   )
   async actualizarCliente(
     @Param('id', ParseIntPipe) id: number,
@@ -91,6 +95,7 @@ export class ClientesController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    TipoUsuario.CLIENTE
   )
   async desactivarCliente(@Param('id', ParseIntPipe) id: number) {
     const cliente = await this.clientesService.desactivarCliente(id);

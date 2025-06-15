@@ -22,6 +22,7 @@ import { RutasModule } from './modules/rutas/rutas.module';
 import { ParadasRutaModule } from './modules/paradas-ruta/paradas-ruta.module';
 import { HorariosRutaModule } from './modules/horarios-ruta/horarios-ruta.module';
 import { ViajesModule } from './modules/viajes/viajes.module';
+import { VentasModule } from './modules/ventas/ventas.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ViajesModule } from './modules/viajes/viajes.module';
     ParadasRutaModule,
     HorariosRutaModule,
     ViajesModule,
+    VentasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
