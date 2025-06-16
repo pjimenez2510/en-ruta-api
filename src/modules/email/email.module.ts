@@ -79,7 +79,17 @@ import { TemplatePathUtil } from './utils/template-path.util';
           },
           template: {
             dir: templatesDir,
-            adapter: new HandlebarsAdapter(),
+            adapter: new HandlebarsAdapter({
+              // 🔧 SOLUCIÓN: Registrar helpers de Handlebars
+              eq: (a: any, b: any) => a === b,
+              ne: (a: any, b: any) => a !== b,
+              lt: (a: any, b: any) => a < b,
+              gt: (a: any, b: any) => a > b,
+              lte: (a: any, b: any) => a <= b,
+              gte: (a: any, b: any) => a >= b,
+              and: (a: any, b: any) => a && b,
+              or: (a: any, b: any) => a || b,
+            }),
             options: {
               strict: true,
             },

@@ -258,6 +258,60 @@ export class EmailController {
   }
 
   @ApiOperation({
+    summary: 'Probar envío de confirmación de venta (para debugging)',
+    description: 'Permite reenviar manualmente la confirmación de una venta para debugging.',
+  })
+  @ApiParam({
+    name: 'ventaId',
+    description: 'ID de la venta',
+    type: 'number',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Test ejecutado',
+    type: EmailResponseDto,
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Post('debug/venta/:ventaId/test-confirmacion')
+  @HttpCode(HttpStatus.OK)
+  async testConfirmacionVenta(
+    @Param() params: VentaIdParamDto,
+  ): Promise<EmailResponseDto> {
+    try {
+      // Primero verificar que la venta existe
+      const ventaExists = await this.emailService['prisma'].venta.findUnique({
+        where: { id: params.ventaId },
+        include: { boletos: true },
+      });
+
+      if (!ventaExists) {
+        return {
+          success: false,
+          message: `❌ Venta ${params.ventaId} no encontrada en la base de datos`,
+        };
+      }
+
+      console.log(`[DEBUG] Venta ${params.ventaId} encontrada con ${ventaExists.boletos.length} boletos`);
+
+      const resultado = await this.emailService.enviarConfirmacionVenta(params.ventaId);
+      
+      return {
+        success: resultado,
+        message: resultado 
+          ? `✅ Confirmación de venta ${params.ventaId} enviada exitosamente (modo debug)` 
+          : `❌ Error al enviar la confirmación de venta ${params.ventaId} (modo debug)`,
+      };
+    } catch (error) {
+      console.error('[DEBUG] Error en test de confirmación:', error);
+      return {
+        success: false,
+        message: `❌ Error ejecutando test: ${error.message}`,
+      };
+    }
+  }
+
+  @ApiOperation({
     summary: 'Obtener estadísticas de emails',
     description: 'Devuelve estadísticas de envío de emails para un período específico.',
   })

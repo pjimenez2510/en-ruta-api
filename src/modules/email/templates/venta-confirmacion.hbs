@@ -9,19 +9,19 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
+            background-color: #f8f9fa;
+            color: #2c3e50;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #2c3e50;
             color: white;
             padding: 30px 20px;
             text-align: center;
@@ -29,7 +29,7 @@
         .header h1 {
             margin: 0;
             font-size: 28px;
-            font-weight: bold;
+            font-weight: 300;
         }
         .header p {
             margin: 10px 0 0 0;
@@ -40,26 +40,27 @@
             padding: 30px 20px;
         }
         .success-message {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #2c3e50;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 25px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 500;
         }
         .info-section {
             margin-bottom: 25px;
             padding: 20px;
             background-color: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-radius: 6px;
+            border-left: 3px solid #6c757d;
         }
         .info-section h3 {
             margin: 0 0 15px 0;
-            color: #667eea;
+            color: #2c3e50;
             font-size: 18px;
+            font-weight: 500;
         }
         .info-row {
             display: flex;
@@ -71,11 +72,11 @@
             margin-bottom: 0;
         }
         .info-label {
-            font-weight: bold;
-            color: #666;
+            font-weight: 500;
+            color: #6c757d;
         }
         .info-value {
-            color: #333;
+            color: #2c3e50;
             text-align: right;
         }
         .boletos-table {
@@ -87,28 +88,28 @@
         .boletos-table td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e9ecef;
         }
         .boletos-table th {
-            background-color: #667eea;
+            background-color: #2c3e50;
             color: white;
-            font-weight: bold;
+            font-weight: 500;
         }
         .boletos-table tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f8f9fa;
         }
         .codigo-acceso {
-            background-color: #667eea;
+            background-color: #6c757d;
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
             font-family: monospace;
-            font-weight: bold;
+            font-weight: 500;
         }
         .total-section {
-            background-color: #e7f3ff;
-            border: 2px solid #667eea;
-            border-radius: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
             padding: 20px;
             margin: 25px 0;
         }
@@ -119,15 +120,15 @@
             font-size: 16px;
         }
         .total-final {
-            border-top: 2px solid #667eea;
+            border-top: 1px solid #e9ecef;
             padding-top: 10px;
             margin-top: 10px;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 18px;
-            color: #667eea;
+            color: #2c3e50;
         }
         .footer {
-            background-color: #2c3e50;
+            background-color: #6c757d;
             color: white;
             padding: 20px;
             text-align: center;
@@ -137,11 +138,11 @@
             margin: 5px 0;
         }
         .note {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #2c3e50;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-top: 20px;
         }
         @media (max-width: 600px) {
@@ -162,17 +163,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>¡Compra Confirmada!</h1>
+            <h1>Compra Confirmada</h1>
             <p>{{nombreCooperativa}}</p>
         </div>
         
         <div class="content">
             <div class="success-message">
-                🎉 ¡Hola {{nombreCliente}}! Tu compra ha sido procesada exitosamente.
+                Hola {{nombreCliente}}, tu compra ha sido procesada exitosamente.
             </div>
             
             <div class="info-section">
-                <h3>📋 Detalles de la Compra</h3>
+                <h3>Detalles de la Compra</h3>
                 <div class="info-row">
                     <span class="info-label">Número de Venta:</span>
                     <span class="info-value">#{{numeroVenta}}</span>
@@ -192,7 +193,7 @@
             </div>
             
             <div class="info-section">
-                <h3>🚌 Información del Viaje</h3>
+                <h3>Información del Viaje</h3>
                 <div class="info-row">
                     <span class="info-label">Ruta:</span>
                     <span class="info-value">{{nombreRuta}}</span>
@@ -212,7 +213,7 @@
             </div>
             
             <div class="info-section">
-                <h3>🎫 Tus Boletos</h3>
+                <h3>Tus Boletos</h3>
                 <table class="boletos-table">
                     <thead>
                         <tr>
@@ -255,7 +256,7 @@
             </div>
             
             <div class="note">
-                <strong>📌 Importante:</strong>
+                <strong>Importante:</strong>
                 <ul>
                     <li>Guarda este email como comprobante de tu compra</li>
                     <li>Presenta tu código de acceso al momento de abordar</li>

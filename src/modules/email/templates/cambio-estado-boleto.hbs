@@ -9,19 +9,19 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
+            background-color: #f8f9fa;
+            color: #2c3e50;
         }
         .container {
             max-width: 500px;
             margin: 20px auto;
             background-color: #ffffff;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
         }
         .header {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            background-color: #2c3e50;
             color: white;
             padding: 25px 20px;
             text-align: center;
@@ -29,7 +29,7 @@
         .header h1 {
             margin: 0;
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 300;
         }
         .update-icon {
             font-size: 48px;
@@ -39,11 +39,11 @@
             padding: 25px 20px;
         }
         .status-update {
-            background-color: #d1ecf1;
-            border: 2px solid #17a2b8;
-            color: #0c5460;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #2c3e50;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -52,33 +52,33 @@
             padding: 10px 20px;
             border-radius: 25px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 500;
             text-transform: uppercase;
             margin: 10px 0;
         }
         .status-confirmado {
-            background-color: #28a745;
+            background-color: #2c3e50;
             color: white;
         }
         .status-cancelado {
-            background-color: #dc3545;
-            color: white;
-        }
-        .status-abordado {
-            background-color: #007bff;
-            color: white;
-        }
-        .status-no-show {
             background-color: #6c757d;
             color: white;
         }
+        .status-abordado {
+            background-color: #495057;
+            color: white;
+        }
+        .status-no-show {
+            background-color: #adb5bd;
+            color: white;
+        }
         .status-pendiente {
-            background-color: #ffc107;
-            color: #212529;
+            background-color: #e9ecef;
+            color: #2c3e50;
         }
         .ticket-info {
             background-color: #f8f9fa;
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
         }
@@ -94,37 +94,37 @@
             margin-bottom: 0;
         }
         .detail-label {
-            font-weight: bold;
-            color: #666;
+            font-weight: 500;
+            color: #6c757d;
         }
         .detail-value {
-            color: #333;
+            color: #2c3e50;
             text-align: right;
         }
         .code-display {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #2c3e50;
             color: white;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             text-align: center;
             margin: 20px 0;
         }
         .access-code {
             font-size: 24px;
             font-family: monospace;
-            font-weight: bold;
+            font-weight: 500;
             letter-spacing: 2px;
         }
         .note {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #2c3e50;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin: 20px 0;
         }
         .footer {
-            background-color: #2c3e50;
+            background-color: #6c757d;
             color: white;
             padding: 20px;
             text-align: center;
@@ -145,7 +145,7 @@
         
         <div class="content">
             <div class="status-update">
-                <p><strong>¡Hola {{nombreCliente}}!</strong></p>
+                <p><strong>Hola {{nombreCliente}}</strong></p>
                 <p>El estado de tu boleto ha cambiado:</p>
                 <div class="status-badge status-{{nuevoEstado}}">{{nuevoEstado}}</div>
             </div>
@@ -157,43 +157,43 @@
             
             <div class="ticket-info">
                 <div class="detail-row">
-                    <span class="detail-label">🗓️ Fecha de Viaje:</span>
+                    <span class="detail-label">Fecha de Viaje:</span>
                     <span class="detail-value">{{fechaViaje}}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">🚌 Ruta:</span>
+                    <span class="detail-label">Ruta:</span>
                     <span class="detail-value">{{nombreRuta}}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">🔄 Nuevo Estado:</span>
+                    <span class="detail-label">Nuevo Estado:</span>
                     <span class="detail-value">{{nuevoEstado}}</span>
                 </div>
             </div>
             
-            {{#if (eq nuevoEstado "CONFIRMADO")}}
+            {{#if esConfirmado}}
             <div class="note">
-                <strong>✅ Boleto Confirmado</strong><br>
+                <strong>Boleto Confirmado</strong><br>
                 Tu boleto ha sido confirmado exitosamente. Ya puedes presentarte en el terminal el día del viaje.
             </div>
             {{/if}}
             
-            {{#if (eq nuevoEstado "CANCELADO")}}
+            {{#if esCancelado}}
             <div class="note">
-                <strong>❌ Boleto Cancelado</strong><br>
+                <strong>Boleto Cancelado</strong><br>
                 Tu boleto ha sido cancelado. Si tienes preguntas sobre el reembolso, contacta nuestro servicio al cliente.
             </div>
             {{/if}}
             
-            {{#if (eq nuevoEstado "ABORDADO")}}
+            {{#if esAbordado}}
             <div class="note">
-                <strong>🚌 Boleto Abordado</strong><br>
+                <strong>Boleto Abordado</strong><br>
                 Has abordado exitosamente. ¡Que tengas un excelente viaje!
             </div>
             {{/if}}
             
-            {{#if (eq nuevoEstado "NO_SHOW")}}
+            {{#if esNoShow}}
             <div class="note">
-                <strong>⚠️ No Show</strong><br>
+                <strong>No Show</strong><br>
                 No te presentaste para el viaje. Contacta nuestro servicio al cliente para información sobre reprogramación.
             </div>
             {{/if}}

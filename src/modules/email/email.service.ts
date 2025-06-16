@@ -18,14 +18,19 @@ export class EmailService {
    */
   async sendEmail(sendEmailDto: SendEmailDto): Promise<boolean> {
     try {
+      this.logger.debug(`[EmailService] Iniciando envío de email a: ${sendEmailDto.to}, plantilla: ${sendEmailDto.template}`);
+      
       // Verificar que la plantilla existe antes de intentar enviar
       if (!TemplatePathUtil.templateExists(sendEmailDto.template)) {
         const availableTemplates = TemplatePathUtil.getAvailableTemplates();
         this.logger.error(
           `Plantilla '${sendEmailDto.template}' no encontrada. Plantillas disponibles: ${availableTemplates.join(', ')}`
         );
+        this.logger.error(`Directorio de plantillas: ${TemplatePathUtil.getTemplatesDirectory()}`);
         return false;
       }
+
+      this.logger.debug(`[EmailService] Plantilla ${sendEmailDto.template} encontrada, enviando email...`);
 
       await this.mailerService.sendMail({
         to: sendEmailDto.to,
@@ -34,15 +39,22 @@ export class EmailService {
         context: sendEmailDto.context,
       });
 
-      this.logger.log(`Email enviado exitosamente a: ${sendEmailDto.to}`);
+      this.logger.log(`[EmailService] Email enviado exitosamente a: ${sendEmailDto.to}`);
       return true;
     } catch (error) {
-      this.logger.error(`Error enviando email a ${sendEmailDto.to}:`, error);
+      this.logger.error(`[EmailService] Error enviando email a ${sendEmailDto.to}:`, error);
       
       // Información adicional para debugging
-      this.logger.error(`Plantilla solicitada: ${sendEmailDto.template}`);
-      this.logger.error(`Directorio de plantillas: ${TemplatePathUtil.getTemplatesDirectory()}`);
-      this.logger.error(`Plantillas disponibles: ${TemplatePathUtil.getAvailableTemplates().join(', ')}`);
+      this.logger.error(`[EmailService] Detalles del error:`);
+      this.logger.error(`  - Plantilla solicitada: ${sendEmailDto.template}`);
+      this.logger.error(`  - Directorio de plantillas: ${TemplatePathUtil.getTemplatesDirectory()}`);
+      this.logger.error(`  - Plantillas disponibles: ${TemplatePathUtil.getAvailableTemplates().join(', ')}`);
+      this.logger.error(`  - Destinatario: ${sendEmailDto.to}`);
+      this.logger.error(`  - Asunto: ${sendEmailDto.subject}`);
+      
+      if (error.message) {
+        this.logger.error(`  - Mensaje de error: ${error.message}`);
+      }
       
       return false;
     }
@@ -53,6 +65,8 @@ export class EmailService {
    */
   async enviarConfirmacionVenta(ventaId: number): Promise<boolean> {
     try {
+      this.logger.log(`[EmailService] Obteniendo datos para venta ${ventaId}`);
+      
       // Obtener datos completos de la venta con relaciones explícitas
       const venta = await this.prisma.venta.findUnique({
         where: { id: ventaId },
@@ -102,18 +116,25 @@ export class EmailService {
         return false;
       }
 
-      // Determinar email del cliente
-      const emailCliente = venta.comprador?.cliente?.email;
-      if (!emailCliente) {
-        this.logger.warn(`No se encontró email para la venta ${ventaId}`);
+      this.logger.log(`[EmailService] Venta ${ventaId} encontrada con ${venta.boletos.length} boletos`);
+
+      // 🔧 CORRECCIÓN: Solo enviar al COMPRADOR, no a cada cliente individual
+      const emailComprador = venta.comprador?.cliente?.email;
+      
+      if (!emailComprador) {
+        this.logger.warn(`No se encontró email del comprador para la venta ${ventaId}`);
         return false;
       }
 
-      // Preparar contexto para la plantilla
+      const nombreComprador = `${venta.comprador.cliente.nombres} ${venta.comprador.cliente.apellidos}`;
+      
+      this.logger.log(`[EmailService] Enviando confirmación al comprador: ${emailComprador}`);
+
+      // Preparar contexto para la plantilla con TODOS los boletos
       const context = {
-        // Información del cliente
-        nombreCliente: `${venta.comprador.cliente.nombres} ${venta.comprador.cliente.apellidos}`,
-        emailCliente,
+        // Información del comprador (quien hizo la compra)
+        nombreCliente: nombreComprador,
+        emailCliente: emailComprador,
         
         // Información de la venta
         numeroVenta: venta.id,
@@ -131,7 +152,7 @@ export class EmailService {
         numeroAutobus: venta.viaje.bus.numero,
         placaAutobus: venta.viaje.bus.placa,
         
-        // Información de boletos
+        // 🔧 CORRECCIÓN: TODOS los boletos de la venta (no filtrados por cliente)
         boletos: venta.boletos.map(boleto => ({
           codigoAcceso: boleto.codigoAcceso,
           nombrePasajero: `${boleto.cliente.nombres} ${boleto.cliente.apellidos}`,
@@ -140,20 +161,34 @@ export class EmailService {
           ciudadOrigen: boleto.paradaOrigen.ciudad.nombre,
           ciudadDestino: boleto.paradaDestino.ciudad.nombre,
           precio: boleto.precioFinal.toFixed(2),
+          precioBase: boleto.precioBase.toFixed(2),
           tipoDescuento: boleto.tipoDescuento,
           porcentajeDescuento: boleto.porcentajeDescuento,
+          montoDescuento: (boleto.precioBase.toNumber() - boleto.precioFinal.toNumber()).toFixed(2),
         })),
         
         // Información de la cooperativa
         nombreCooperativa: venta.tenant.nombre,
+        
+        // Información adicional
+        totalBoletos: venta.boletos.length,
+        hayDescuentos: venta.totalDescuentos.toNumber() > 0,
       };
 
-      return await this.sendEmail({
-        to: emailCliente,
+      const resultado = await this.sendEmail({
+        to: emailComprador,
         subject: `Confirmación de compra #${venta.id} - ${venta.tenant.nombre}`,
         template: 'venta-confirmacion',
         context,
       });
+
+      if (resultado) {
+        this.logger.log(`[EmailService] Email de confirmación enviado exitosamente al comprador: ${emailComprador}`);
+      } else {
+        this.logger.warn(`[EmailService] Error enviando email de confirmación al comprador: ${emailComprador}`);
+      }
+      
+      return resultado;
     } catch (error) {
       this.logger.error(`Error enviando confirmación de venta ${ventaId}:`, error);
       return false;
@@ -346,6 +381,13 @@ export class EmailService {
         fechaViaje: boleto.fechaViaje.toLocaleDateString('es-ES'),
         nombreRuta: boleto.viaje.horarioRuta.ruta.nombre,
         nombreCooperativa: boleto.tenant.nombre,
+        
+        // 🔧 SOLUCIÓN: Variables booleanas para simplificar las condicionales
+        esConfirmado: nuevoEstado === 'CONFIRMADO',
+        esCancelado: nuevoEstado === 'CANCELADO',
+        esAbordado: nuevoEstado === 'ABORDADO',
+        esNoShow: nuevoEstado === 'NO_SHOW',
+        esPendiente: nuevoEstado === 'PENDIENTE',
       };
 
       return await this.sendEmail({
