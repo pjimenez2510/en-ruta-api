@@ -303,6 +303,9 @@ export class BoletosController {
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
     RolUsuario.OFICINISTA,
+    RolUsuario.CONDUCTOR,
+    RolUsuario.AYUDANTE,
+    TipoUsuario.CLIENTE,
   )
   @Patch(':id/confirmar')
   async confirmarBoleto(
