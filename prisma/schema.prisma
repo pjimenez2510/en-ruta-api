@@ -224,7 +224,7 @@ model TipoRutaBus {
   Ruta     Ruta[]
 
   @@index([tenantId])
-  @@map("tipos_ruta_buse")
+  @@map("tipos_ruta_bus")
 }
 
 model Bus {
