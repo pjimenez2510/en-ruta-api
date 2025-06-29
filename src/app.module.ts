@@ -28,6 +28,7 @@ import { MetodosPagoModule } from './modules/metodos-pago/metodos-pago.module';
 import { ConfiguracionDescuentosModule } from './modules/configuracion-descuentos/configuracion-descuentos.module';
 import { EmailModule } from './modules/email/email.module';
 import { TiposRutaBusModule } from './modules/tipos-ruta-bus/tipos-ruta-bus.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { TiposRutaBusModule } from './modules/tipos-ruta-bus/tipos-ruta-bus.modu
     ConfiguracionDescuentosModule,
     EmailModule,
     TiposRutaBusModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
