@@ -6,6 +6,7 @@ import { seedUsuarios } from './seeds/seed-usuarios-personal';
 import { seedBuses } from './seeds/seed-buses';
 import { seedCiudades } from './seeds/seed-cuidades';
 import { seedRutas } from './seeds/seed-ruta-horario';
+import { seedTiposRutaBus } from './seeds/seed-tipos-ruta-bus';
 
 const prisma = new PrismaClient();
 
@@ -23,11 +24,14 @@ async function main() {
   console.log('🚌 Creando modelos de buses...');
   const { modelosBus, plantillasPiso, tiposAsiento } = await seedModelosBuses(prisma, tenants);
 
+  console.log('🛣️ Creando tipos de ruta de bus...');
+  const tiposRutaBus = await seedTiposRutaBus(prisma, tenants);
+
   console.log('🚐 Creando buses...');
-  await seedBuses(prisma, tenants, modelosBus, plantillasPiso, tiposAsiento);
+  await seedBuses(prisma, tenants, modelosBus, plantillasPiso, tiposAsiento, tiposRutaBus);
 
   console.log('🛣️ Creando rutas...');
-  const rutas = await seedRutas(prisma, tenants);
+  const rutas = await seedRutas(prisma, tenants, tiposRutaBus);
 
   console.log('✅ Seed completado exitosamente!');
 }
@@ -50,6 +54,7 @@ async function cleanDatabase() {
   await prisma.ubicacionAsientoPlantilla.deleteMany();
   await prisma.plantillaPiso.deleteMany();
   await prisma.modeloBus.deleteMany();
+  await prisma.tipoRutaBus.deleteMany();
   await prisma.resolucionANT.deleteMany();
   await prisma.personalCooperativa.deleteMany();
   await prisma.usuarioTenant.deleteMany();

@@ -53,10 +53,22 @@ export class GeneracionViajesService {
       );
     }
 
-    if (buses.length < horariosRuta.length) {
-      throw new BadRequestException(
-        `Se necesitan al menos ${horariosRuta.length} buses para cubrir ${horariosRuta.length} horarios de ruta. Actualmente tienes ${buses.length} buses disponibles.`,
-      );
+    // Agrupar buses por tipo de ruta
+    const busesPorTipo = this.agruparBusesPorTipo(buses);
+    const horariosPorTipo = this.agruparHorariosPorTipo(horariosRuta);
+
+    // Verificar que cada tipo tenga buses suficientes
+    for (const [tipoRutaId, horarios] of horariosPorTipo.entries()) {
+      const busesDelTipo = busesPorTipo.get(tipoRutaId) || [];
+      if (busesDelTipo.length < horarios.length) {
+        const tipoRuta = await this.prisma.tipoRutaBus.findUnique({
+          where: { id: tipoRutaId },
+          select: { nombre: true }
+        });
+        throw new BadRequestException(
+          `Se necesitan al menos ${horarios.length} buses del tipo "${tipoRuta?.nombre}" para cubrir ${horarios.length} horarios de ruta. Actualmente tienes ${busesDelTipo.length} buses disponibles.`,
+        );
+      }
     }
 
     const viajesGenerados = await this.generarMatrizViajesConRotacionDiaria(
@@ -100,10 +112,22 @@ export class GeneracionViajesService {
         );
       }
 
-      if (buses.length < horariosRuta.length) {
-        throw new BadRequestException(
-          `Se necesitan al menos ${horariosRuta.length} buses para cubrir ${horariosRuta.length} horarios de ruta. Actualmente tienes ${buses.length} buses disponibles.`,
-        );
+      // Agrupar buses por tipo de ruta
+      const busesPorTipo = this.agruparBusesPorTipo(buses);
+      const horariosPorTipo = this.agruparHorariosPorTipo(horariosRuta);
+
+      // Verificar que cada tipo tenga buses suficientes
+      for (const [tipoRutaId, horarios] of horariosPorTipo.entries()) {
+        const busesDelTipo = busesPorTipo.get(tipoRutaId) || [];
+        if (busesDelTipo.length < horarios.length) {
+          const tipoRuta = await this.prisma.tipoRutaBus.findUnique({
+            where: { id: tipoRutaId },
+            select: { nombre: true }
+          });
+          throw new BadRequestException(
+            `Se necesitan al menos ${horarios.length} buses del tipo "${tipoRuta?.nombre}" para cubrir ${horarios.length} horarios de ruta. Actualmente tienes ${busesDelTipo.length} buses disponibles.`,
+          );
+        }
       }
 
       const viajesGenerados = await this.generarMatrizViajesConRotacionDiaria(
@@ -146,6 +170,13 @@ export class GeneracionViajesService {
             id: true,
             nombre: true,
             descripcion: true,
+            tipoRutaBusId: true,
+            tipoRutaBus: {
+              select: {
+                id: true,
+                nombre: true,
+              },
+            },
           },
         },
       },
@@ -170,9 +201,44 @@ export class GeneracionViajesService {
         numero: true,
         placa: true,
         totalAsientos: true,
+        tipoRutaBusId: true,
+        tipoRutaBus: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
       },
       orderBy: { numero: 'asc' },
     });
+  }
+
+  private agruparBusesPorTipo(buses: any[]): Map<number, any[]> {
+    const busesPorTipo = new Map<number, any[]>();
+    
+    for (const bus of buses) {
+      const tipoRutaId = bus.tipoRutaBusId;
+      if (!busesPorTipo.has(tipoRutaId)) {
+        busesPorTipo.set(tipoRutaId, []);
+      }
+      busesPorTipo.get(tipoRutaId)!.push(bus);
+    }
+    
+    return busesPorTipo;
+  }
+
+  private agruparHorariosPorTipo(horarios: any[]): Map<number, any[]> {
+    const horariosPorTipo = new Map<number, any[]>();
+    
+    for (const horario of horarios) {
+      const tipoRutaId = horario.ruta.tipoRutaBusId;
+      if (!horariosPorTipo.has(tipoRutaId)) {
+        horariosPorTipo.set(tipoRutaId, []);
+      }
+      horariosPorTipo.get(tipoRutaId)!.push(horario);
+    }
+    
+    return horariosPorTipo;
   }
 
   private async generarMatrizViajesConRotacionDiaria(
@@ -221,68 +287,79 @@ export class GeneracionViajesService {
       )
     );
 
-    const horariosOrdenados = [...horariosRuta].sort((a, b) => {
-      if (a.ruta.nombre !== b.ruta.nombre) {
-        return a.ruta.nombre.localeCompare(b.ruta.nombre);
-      }
-      return a.horaSalida.localeCompare(b.horaSalida);
-    });
+    // Agrupar por tipo de ruta
+    const busesPorTipo = this.agruparBusesPorTipo(buses);
+    const horariosPorTipo = this.agruparHorariosPorTipo(horariosRuta);
 
     // Arrays para recopilar viajes
     const viajesParaCrear: any[] = [];
     const viajesParaPrevisualizar: ViajeGeneradoDto[] = [];
 
-    // Generar matriz de viajes
-    for (let indiceFecha = 0; indiceFecha < fechas.length; indiceFecha++) {
-      const fecha = fechas[indiceFecha];
-      const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay(); 
-      const posicionDia = diaSemana - 1; 
+    // Generar matriz de viajes por tipo
+    for (const [tipoRutaId, horariosDelTipo] of horariosPorTipo.entries()) {
+      const busesDelTipo = busesPorTipo.get(tipoRutaId) || [];
+      
+      // Ordenar horarios del tipo
+      const horariosOrdenados = [...horariosDelTipo].sort((a, b) => {
+        if (a.ruta.nombre !== b.ruta.nombre) {
+          return a.ruta.nombre.localeCompare(b.ruta.nombre);
+        }
+        return a.horaSalida.localeCompare(b.horaSalida);
+      });
 
-      for (let indiceHorario = 0; indiceHorario < horariosOrdenados.length; indiceHorario++) {
-        const horario = horariosOrdenados[indiceHorario];
+      // Generar viajes para cada fecha
+      for (let indiceFecha = 0; indiceFecha < fechas.length; indiceFecha++) {
+        const fecha = fechas[indiceFecha];
+        const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay(); 
+        const posicionDia = diaSemana - 1; 
 
-        if (horario.diasSemana && horario.diasSemana[posicionDia] === '1') {
-          // Calcular bus asignado con rotación
-          const indiceBusRotado = (indiceHorario + indiceFecha) % buses.length;
-          const busAsignado = buses[indiceBusRotado];
+        // Generar viajes para cada horario del tipo
+        for (let indiceHorario = 0; indiceHorario < horariosOrdenados.length; indiceHorario++) {
+          const horario = horariosOrdenados[indiceHorario];
 
-          // Verificar si ya existe
-          const claveViaje = `${fecha.getTime()}-${horario.id}-${busAsignado.id}`;
-          const yaExiste = viajesExistentesSet.has(claveViaje);
+          if (horario.diasSemana && horario.diasSemana[posicionDia] === '1') {
+            // Calcular bus asignado con rotación (solo dentro del mismo tipo)
+            const indiceBusRotado = (indiceHorario + indiceFecha) % busesDelTipo.length;
+            const busAsignado = busesDelTipo[indiceBusRotado];
 
-          if (!guardar) {
-            // Modo previsualización
-            const viajeGenerado: ViajeGeneradoDto = {
-              id: null,
-              conductorId: null,
-              ayudanteId: null,
-              horaSalidaReal: null,
-              observaciones: null,
-              estado: EstadoViaje.PROGRAMADO,
-              capacidadTotal: busAsignado.totalAsientos,
-              generacion: TipoGeneracion.AUTOMATICA,
-              tenantId,
-              fecha,
-              horarioRuta: {
-                id: horario.id,
-                horaSalida: horario.horaSalida,
-                ruta: horario.ruta,
-              },
-              bus: busAsignado,
-            };
-            viajesParaPrevisualizar.push(viajeGenerado);
-          } else if (!yaExiste) {
-            // Modo guardar - recopilar para inserción masiva
-            viajesParaCrear.push({
-              tenantId,
-              horarioRutaId: horario.id,
-              busId: busAsignado.id,
-              fecha,
-              estado: EstadoViaje.PROGRAMADO,
-              capacidadTotal: busAsignado.totalAsientos,
-              asientosOcupados: 0,
-              generacion: TipoGeneracion.AUTOMATICA,
-            });
+            // Verificar si ya existe
+            const claveViaje = `${fecha.getTime()}-${horario.id}-${busAsignado.id}`;
+            const yaExiste = viajesExistentesSet.has(claveViaje);
+
+            if (!guardar) {
+              // Modo previsualización
+              const viajeGenerado: ViajeGeneradoDto = {
+                id: null,
+                conductorId: null,
+                ayudanteId: null,
+                horaSalidaReal: null,
+                observaciones: null,
+                estado: EstadoViaje.PROGRAMADO,
+                capacidadTotal: busAsignado.totalAsientos,
+                generacion: TipoGeneracion.AUTOMATICA,
+                tenantId,
+                fecha,
+                horarioRuta: {
+                  id: horario.id,
+                  horaSalida: horario.horaSalida,
+                  ruta: horario.ruta,
+                },
+                bus: busAsignado,
+              };
+              viajesParaPrevisualizar.push(viajeGenerado);
+            } else if (!yaExiste) {
+              // Modo guardar - recopilar para inserción masiva
+              viajesParaCrear.push({
+                tenantId,
+                horarioRutaId: horario.id,
+                busId: busAsignado.id,
+                fecha,
+                estado: EstadoViaje.PROGRAMADO,
+                capacidadTotal: busAsignado.totalAsientos,
+                asientosOcupados: 0,
+                generacion: TipoGeneracion.AUTOMATICA,
+              });
+            }
           }
         }
       }

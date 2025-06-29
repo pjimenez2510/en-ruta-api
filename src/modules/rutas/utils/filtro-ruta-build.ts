@@ -11,10 +11,14 @@ export const filtroRutaBuild = (
     where.tenantId = tenantId;
   }
 
-  const { nombre, resolucionId, activo } = filtro;
+  const { nombre, tipoRutaBusId, resolucionId, activo } = filtro;
 
   if (nombre) {
     where.nombre = { contains: nombre, mode: 'insensitive' };
+  }
+
+  if (tipoRutaBusId !== undefined) {
+    where.tipoRutaBusId = tipoRutaBusId;
   }
 
   if (resolucionId !== undefined) {

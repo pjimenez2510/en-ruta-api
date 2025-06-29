@@ -1,7 +1,7 @@
 // prisma/seeds/buses.seed.ts
 import { PrismaClient, EstadoBus, EstadoAsiento } from '@prisma/client';
 
-export async function seedBuses(prisma: PrismaClient, tenants: any[], modelosBus: any[], plantillasPiso: any[], tiposAsiento: any[]) {
+export async function seedBuses(prisma: PrismaClient, tenants: any[], modelosBus: any[], plantillasPiso: any[], tiposAsiento: any[], tiposRutaBus: any[]) {
   const buses = [];
   const pisosBus = [];
 
@@ -9,13 +9,18 @@ export async function seedBuses(prisma: PrismaClient, tenants: any[], modelosBus
     const tenant = tenants[tenantIndex];
     const tenantPrefix = tenantIndex === 0 ? 'TPE' : tenantIndex === 1 ? 'TBA' : 'TRB';
     
-    // Obtener tipos de asiento para este tenant
+    // Obtener tipos de asiento y tipos de ruta para este tenant
     const tiposAsientoTenant = tiposAsiento.filter(ta => ta.tenantId === tenant.id);
+    const tiposRutaBusTenant = tiposRutaBus.filter(trb => trb.tenantId === tenant.id);
     
     for (let busIndex = 1; busIndex <= 12; busIndex++) {
       // Alternar entre diferentes modelos
       const modeloIndex = (busIndex - 1) % modelosBus.length;
       const modelo = modelosBus[modeloIndex];
+      
+      // Alternar entre tipos de ruta de bus
+      const tipoRutaBusIndex = busIndex % tiposRutaBusTenant.length;
+      const tipoRutaBus = tiposRutaBusTenant[tipoRutaBusIndex];
       
       // Calcular asientos según el modelo
       let totalAsientos;
@@ -33,6 +38,7 @@ export async function seedBuses(prisma: PrismaClient, tenants: any[], modelosBus
         data: {
           tenantId: tenant.id,
           modeloBusId: modelo.id,
+          tipoRutaBusId: tipoRutaBus.id,
           numero: (tenantIndex * 100) + 100 + busIndex,
           placa: `${tenantPrefix}-${String(1000 + busIndex).slice(1)}`,
           anioFabricacion: 2018 + (busIndex % 5),

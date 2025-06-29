@@ -4,6 +4,7 @@ export const BUS_SELECT: Prisma.BusSelect = {
   id: true,
   tenantId: true,
   modeloBusId: true,
+  tipoRutaBusId: true,
   numero: true,
   placa: true,
   anioFabricacion: true,
@@ -32,6 +33,12 @@ export const BUS_SELECT_WITH_RELATIONS: Prisma.BusSelect = {
       numeroPisos: true,
     },
   },
+  tipoRutaBus: {
+    select: {
+      id: true,
+      nombre: true,
+    },
+  },
 };
 
 export type BusWithPisosAndAsientos = Prisma.BusGetPayload<{
@@ -54,6 +61,12 @@ export const BUS_SELECT_WITH_PISOS_AND_ASIENTOS: Prisma.BusSelect = {
       tipoChasis: true,
       tipoCarroceria: true,
       numeroPisos: true,
+    },
+  },
+  tipoRutaBus: {
+    select: {
+      id: true,
+      nombre: true,
     },
   },
   pisos: {

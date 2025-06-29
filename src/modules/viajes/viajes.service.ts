@@ -55,6 +55,15 @@ export class ViajesService {
           tenantId,
         },
       },
+      include: {
+        ruta: {
+          select: {
+            id: true,
+            nombre: true,
+            tipoRutaBusId: true,
+          },
+        },
+      },
     });
 
     if (!horarioRuta) {
@@ -66,11 +75,35 @@ export class ViajesService {
     // Validar que el bus pertenezca al tenant
     const bus = await this.prisma.bus.findUnique({
       where: { id: datos.busId, tenantId },
+      select: {
+        id: true,
+        numero: true,
+        placa: true,
+        totalAsientos: true,
+        tipoRutaBusId: true,
+      },
     });
 
     if (!bus) {
       throw new NotFoundException(
         `El bus con ID ${datos.busId} no existe o no pertenece al tenant ${tenantId}`,
+      );
+    }
+
+    // Validar que el bus y la ruta sean del mismo tipo
+    if (bus.tipoRutaBusId !== horarioRuta.ruta.tipoRutaBusId) {
+      const tipoRutaBus = await this.prisma.tipoRutaBus.findMany({
+        where: {
+          id: { in: [bus.tipoRutaBusId, horarioRuta.ruta.tipoRutaBusId] },
+        },
+        select: { id: true, nombre: true },
+      });
+      
+      const tipoBus = tipoRutaBus.find(t => t.id === bus.tipoRutaBusId);
+      const tipoRuta = tipoRutaBus.find(t => t.id === horarioRuta.ruta.tipoRutaBusId);
+      
+      throw new BadRequestException(
+        `El bus (tipo: ${tipoBus?.nombre}) y la ruta (tipo: ${tipoRuta?.nombre}) deben ser del mismo tipo de ruta de bus`,
       );
     }
 
@@ -165,12 +198,96 @@ export class ViajesService {
     if (datos.busId) {
       const bus = await this.prisma.bus.findUnique({
         where: { id: datos.busId, tenantId },
+        select: {
+          id: true,
+          numero: true,
+          placa: true,
+          totalAsientos: true,
+          tipoRutaBusId: true,
+        },
       });
-      datosActualizacion.capacidadTotal = bus.totalAsientos;
 
       if (!bus) {
         throw new NotFoundException(
           `El bus con ID ${datos.busId} no existe o no pertenece al tenant ${tenantId}`,
+        );
+      }
+
+      // Validar que el bus sea del mismo tipo que la ruta del viaje
+      const horarioRuta = await this.prisma.horarioRuta.findUnique({
+        where: { id: viaje.horarioRutaId },
+        include: {
+          ruta: {
+            select: {
+              tipoRutaBusId: true,
+            },
+          },
+        },
+      });
+
+      if (bus.tipoRutaBusId !== horarioRuta.ruta.tipoRutaBusId) {
+        const tipoRutaBus = await this.prisma.tipoRutaBus.findMany({
+          where: {
+            id: { in: [bus.tipoRutaBusId, horarioRuta.ruta.tipoRutaBusId] },
+          },
+          select: { id: true, nombre: true },
+        });
+        
+        const tipoBus = tipoRutaBus.find(t => t.id === bus.tipoRutaBusId);
+        const tipoRuta = tipoRutaBus.find(t => t.id === horarioRuta.ruta.tipoRutaBusId);
+        
+        throw new BadRequestException(
+          `El bus (tipo: ${tipoBus?.nombre}) y la ruta (tipo: ${tipoRuta?.nombre}) deben ser del mismo tipo de ruta de bus`,
+        );
+      }
+
+      datosActualizacion.capacidadTotal = bus.totalAsientos;
+    }
+
+    if (datos.horarioRutaId) {
+      const horarioRuta = await this.prisma.horarioRuta.findFirst({
+        where: {
+          id: datos.horarioRutaId,
+          ruta: {
+            tenantId,
+          },
+        },
+        include: {
+          ruta: {
+            select: {
+              tipoRutaBusId: true,
+            },
+          },
+        },
+      });
+
+      if (!horarioRuta) {
+        throw new NotFoundException(
+          `El horario de ruta con ID ${datos.horarioRutaId} no existe`,
+        );
+      }
+
+      // Validar que la nueva ruta sea del mismo tipo que el bus del viaje
+      const bus = await this.prisma.bus.findUnique({
+        where: { id: viaje.busId },
+        select: {
+          tipoRutaBusId: true,
+        },
+      });
+
+      if (bus.tipoRutaBusId !== horarioRuta.ruta.tipoRutaBusId) {
+        const tipoRutaBus = await this.prisma.tipoRutaBus.findMany({
+          where: {
+            id: { in: [bus.tipoRutaBusId, horarioRuta.ruta.tipoRutaBusId] },
+          },
+          select: { id: true, nombre: true },
+        });
+        
+        const tipoBus = tipoRutaBus.find(t => t.id === bus.tipoRutaBusId);
+        const tipoRuta = tipoRutaBus.find(t => t.id === horarioRuta.ruta.tipoRutaBusId);
+        
+        throw new BadRequestException(
+          `El bus (tipo: ${tipoBus?.nombre}) y la ruta (tipo: ${tipoRuta?.nombre}) deben ser del mismo tipo de ruta de bus`,
         );
       }
     }

@@ -34,6 +34,7 @@ model Tenant {
   configuraciones         Configuracion[]
   notificaciones          Notificacion[]
   metodosPago             MetodoPago[]
+  TipoRutaBus             TipoRutaBus[]
 
   @@map("tenants")
 }
@@ -141,7 +142,7 @@ model Ciudad {
   longitud  Decimal? @db.Decimal(10, 6)
   activo    Boolean  @default(true)
 
-  paradas      ParadaRuta[]
+  paradas ParadaRuta[]
 
   @@map("ciudades")
 }
@@ -214,10 +215,23 @@ model UbicacionAsientoPlantilla {
   @@map("ubicaciones_asiento_plantilla")
 }
 
+model TipoRutaBus {
+  id       Int    @id @default(autoincrement())
+  tenantId Int
+  nombre   String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  Bus      Bus[]
+  Ruta     Ruta[]
+
+  @@index([tenantId])
+  @@map("tipos_ruta_bus")
+}
+
 model Bus {
   id              Int       @id @default(autoincrement())
   tenantId        Int
   modeloBusId     Int
+  tipoRutaBusId   Int
   numero          Int
   placa           String
   anioFabricacion Int?
@@ -230,6 +244,7 @@ model Bus {
   // Relaciones
   tenant          Tenant              @relation(fields: [tenantId], references: [id])
   modeloBus       ModeloBus           @relation(fields: [modeloBusId], references: [id])
+  tipoRutaBus     TipoRutaBus         @relation(fields: [tipoRutaBusId], references: [id])
   pisos           PisoBus[]
   viajes          Viaje[] // NUEVO: reemplaza hojasTrabajo
   caracteristicas CaracteristicaBus[]
@@ -311,18 +326,20 @@ model Asiento {
 // MODELOS SIMPLIFICADOS PARA RUTAS Y VIAJES
 
 model Ruta {
-  id              Int      @id @default(autoincrement())
-  tenantId        Int
-  nombre          String
-  resolucionId    Int
-  descripcion     String?
-  activo          Boolean  @default(true)
+  id            Int     @id @default(autoincrement())
+  tenantId      Int
+  tipoRutaBusId Int
+  nombre        String
+  resolucionId  Int
+  descripcion   String?
+  activo        Boolean @default(true)
 
   // Relaciones
-  tenant        Tenant        @relation(fields: [tenantId], references: [id])
-  resolucion    ResolucionANT @relation(fields: [resolucionId], references: [id])
-  paradas       ParadaRuta[] // Paradas intermedias ordenadas
-  horarios      HorarioRuta[] // Horarios de salida de la ruta
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  tipoRutaBus TipoRutaBus   @relation(fields: [tipoRutaBusId], references: [id])
+  resolucion  ResolucionANT @relation(fields: [resolucionId], references: [id])
+  paradas     ParadaRuta[] // Paradas intermedias ordenadas
+  horarios    HorarioRuta[] // Horarios de salida de la ruta
 
   @@unique([tenantId, nombre])
   @@index([tenantId]) // Índice para búsquedas eficientes
@@ -331,13 +348,13 @@ model Ruta {
 
 // NUEVO: Paradas intermedias simplificadas
 model ParadaRuta {
-  id                  Int      @id @default(autoincrement())
-  rutaId              Int
-  ciudadId            Int
-  orden               Int // Orden en la ruta (0 = origen, último = destino)
-  distanciaAcumulada  Decimal? @db.Decimal(10, 2) // Desde el origen
-  tiempoAcumulado     Int // Minutos desde el origen
-  precioAcumulado     Decimal  @db.Decimal(10, 2) // Precio desde el origen
+  id                 Int      @id @default(autoincrement())
+  rutaId             Int
+  ciudadId           Int
+  orden              Int // Orden en la ruta (0 = origen, último = destino)
+  distanciaAcumulada Decimal? @db.Decimal(10, 2) // Desde el origen
+  tiempoAcumulado    Int // Minutos desde el origen
+  precioAcumulado    Decimal  @db.Decimal(10, 2) // Precio desde el origen
 
   // Relaciones
   ruta   Ruta   @relation(fields: [rutaId], references: [id], onDelete: Cascade)
@@ -359,11 +376,11 @@ model ParadaRuta {
 
 // NUEVO: Horarios simplificados
 model HorarioRuta {
-  id         Int       @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   rutaId     Int
   horaSalida String // "12:00"
   diasSemana String // "1111111" o "1111100" etc
-  activo     Boolean   @default(true)
+  activo     Boolean @default(true)
 
   // Relaciones
   ruta   Ruta    @relation(fields: [rutaId], references: [id], onDelete: Cascade)
@@ -465,17 +482,17 @@ model MetodoPago {
 }
 
 model Venta {
-  id                Int         @id @default(autoincrement())
+  id                Int        @id @default(autoincrement())
   tenantId          Int
-  viajeId           Int 
+  viajeId           Int
   usuarioId         Int
   oficinistaId      Int?
-  fechaVenta        DateTime    @default(now())
+  fechaVenta        DateTime   @default(now())
   metodoPagoId      Int
-  totalSinDescuento Decimal     @db.Decimal(10, 2)
-  totalDescuentos   Decimal     @default(0) @db.Decimal(10, 2)
-  totalFinal        Decimal     @db.Decimal(10, 2)
-  estadoPago        EstadoPago  @default(PENDIENTE)
+  totalSinDescuento Decimal    @db.Decimal(10, 2)
+  totalDescuentos   Decimal    @default(0) @db.Decimal(10, 2)
+  totalFinal        Decimal    @db.Decimal(10, 2)
+  estadoPago        EstadoPago @default(PENDIENTE)
 
   // Relaciones
   tenant     Tenant     @relation(fields: [tenantId], references: [id])
@@ -530,12 +547,12 @@ model Boleto {
 }
 
 model RegistroAbordaje {
-  id              Int            @id @default(autoincrement())
-  boletoId        Int
-  usuarioId       Int
-  fechaHora       DateTime       @default(now())
-  estadoAbordaje  EstadoAbordaje @default(PENDIENTE)
-  observaciones   String?
+  id             Int            @id @default(autoincrement())
+  boletoId       Int
+  usuarioId      Int
+  fechaHora      DateTime       @default(now())
+  estadoAbordaje EstadoAbordaje @default(PENDIENTE)
+  observaciones  String?
 
   // Relaciones
   boleto      Boleto  @relation(fields: [boletoId], references: [id])
@@ -624,8 +641,6 @@ enum EstadoAsiento {
   RESERVADO
 }
 
-
-
 enum TipoDescuento {
   MENOR_EDAD
   TERCERA_EDAD
@@ -653,8 +668,6 @@ enum EstadoPago {
   RECHAZADO
 }
 
-
-
 enum TipoDescuentoCliente {
   NINGUNO
   MENOR_EDAD
@@ -669,7 +682,6 @@ enum EstadoBoleto {
   NO_SHOW
   CANCELADO
 }
-
 
 enum TipoConfiguracion {
   TEXTO
