@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: en-ruta-postgres
+    environment:
+      POSTGRES_DB: development_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - en-ruta-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación NestJS
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: en-ruta-api
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:root@postgres:5432/development_db?schema=public
+      DIRECT_URL: postgresql://postgres:root@postgres:5432/development_db?schema=public
+      JWT_SECRET: secret
+      JWT_EXPIRATION: 360d
+      PORT: 3000
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_SECURE: false
+      EMAIL_USER: pjimenez2510@gmail.com
+      EMAIL_PASSWORD: vbxj ddvn vnss qobl
+      EMAIL_FROM_NAME: EnRuta - Sistema de Transporte
+      EMAIL_FROM_ADDRESS: pjimenez2510@gmail.com
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - en-ruta-network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        npx prisma generate &&
+        node dist/src/main.js
+      "
+
+  # Redis para cache (opcional)
+  redis:
+    image: redis:7-alpine
+    container_name: en-ruta-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - en-ruta-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  en-ruta-network:
+    driver: bridge 
