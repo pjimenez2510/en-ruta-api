@@ -56,6 +56,15 @@ export class FiltroBusDto {
   modeloBusId?: number;
 
   @ApiProperty({
+    description: 'Filtrar por ID de tipo de ruta de bus',
+    required: false,
+  })
+  @IsInt({ message: 'El ID del tipo de ruta de bus debe ser un número entero' })
+  @IsOptional()
+  @Transform(({ value }) => (value ? parseInt(value) : undefined))
+  tipoRutaBusId?: number;
+
+  @ApiProperty({
     description: 'Filtrar por estado',
     required: false,
     enum: EstadoBus,
