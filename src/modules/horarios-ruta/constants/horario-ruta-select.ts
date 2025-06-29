@@ -12,4 +12,10 @@ export const HORARIO_RUTA_SELECT: Prisma.HorarioRutaSelect = {
 export const HORARIO_RUTA_SELECT_WITH_RELATIONS: Prisma.HorarioRutaSelect = {
   ...HORARIO_RUTA_SELECT,
   rutaId: true,
+  ruta: {
+    select: {
+      id: true,
+      nombre: true
+    }
+  }
 }; 
