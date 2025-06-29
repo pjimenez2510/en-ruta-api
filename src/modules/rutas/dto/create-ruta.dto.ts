@@ -17,6 +17,14 @@ export class CreateRutaDto {
   nombre: string;
 
   @ApiProperty({
+    description: 'ID del tipo de ruta de bus',
+    example: 1,
+  })
+  @IsInt({ message: 'El ID del tipo de ruta de bus debe ser un número entero' })
+  @IsNotEmpty({ message: 'El ID del tipo de ruta de bus es requerido' })
+  tipoRutaBusId: number;
+
+  @ApiProperty({
     description: 'ID de la resolución ANT',
     example: 1,
   })
