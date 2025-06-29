@@ -2,7 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
-export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
+export async function seedRutas(prisma: PrismaClient, tenants: any[], tiposRutaBus: any[]) {
   // Crear resoluciones ANT
   const resolucionesANT = await Promise.all([
     prisma.resolucionANT.create({
@@ -48,6 +48,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Pelileo - Ambato - Quito',
       descripcion: 'Ruta interprovincial desde Pelileo hasta Quito con parada en Ambato',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Pelileo', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Ambato', orden: 1, distancia: 18.5, tiempo: 25, precio: 1.5 },
@@ -61,6 +62,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Pelileo - Riobamba',
       descripcion: 'Ruta intercantonal directa desde Pelileo hasta Riobamba',
+      tipoRuta: 'Intercantonal',
       paradas: [
         { ciudad: 'Pelileo', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Riobamba', orden: 1, distancia: 65.2, tiempo: 90, precio: 3.5 },
@@ -73,6 +75,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Pelileo - Latacunga - Quito',
       descripcion: 'Ruta alternativa hacia Quito vía Latacunga',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Pelileo', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Ambato', orden: 1, distancia: 18.5, tiempo: 25, precio: 1.5 },
@@ -86,6 +89,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Pelileo - Cuenca',
       descripcion: 'Ruta hacia el sur del país',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Pelileo', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Riobamba', orden: 1, distancia: 65.2, tiempo: 90, precio: 3.5 },
@@ -100,6 +104,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Ambato - Guaranda',
       descripcion: 'Ruta intercantonal hacia Bolívar',
+      tipoRuta: 'Intercantonal',
       paradas: [
         { ciudad: 'Ambato', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Guaranda', orden: 1, distancia: 62.4, tiempo: 95, precio: 3.8 },
@@ -115,6 +120,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Baños - Puyo - Tena',
       descripcion: 'Ruta turística amazónica desde Baños hasta Tena',
+      tipoRuta: 'Turístico',
       paradas: [
         { ciudad: 'Baños', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Puyo', orden: 1, distancia: 61.4, tiempo: 75, precio: 2.75 },
@@ -128,6 +134,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Baños - Ambato - Latacunga',
       descripcion: 'Ruta interprovincial hacia el norte',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Baños', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Ambato', orden: 1, distancia: 42.3, tiempo: 55, precio: 2.25 },
@@ -141,6 +148,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Baños - Riobamba - Alausí',
       descripcion: 'Ruta turística hacia la Nariz del Diablo',
+      tipoRuta: 'Turístico',
       paradas: [
         { ciudad: 'Baños', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Riobamba', orden: 1, distancia: 85.7, tiempo: 110, precio: 4.2 },
@@ -154,6 +162,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Baños - Quito',
       descripcion: 'Ruta directa hacia la capital',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Baños', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Ambato', orden: 1, distancia: 42.3, tiempo: 55, precio: 2.25 },
@@ -168,6 +177,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Baños - Shell',
       descripcion: 'Ruta corta hacia Shell Mera',
+      tipoRuta: 'Turístico',
       paradas: [
         { ciudad: 'Baños', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Shell', orden: 1, distancia: 18.2, tiempo: 25, precio: 1.25 },
@@ -184,6 +194,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Riobamba - Guayaquil',
       descripcion: 'Ruta interprovincial hacia la costa',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Riobamba', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Alausí', orden: 1, distancia: 56.6, tiempo: 75, precio: 2.8 },
@@ -199,6 +210,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Riobamba - Quito',
       descripcion: 'Ruta directa hacia la capital',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Riobamba', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Ambato', orden: 1, distancia: 47.2, tiempo: 65, precio: 2.4 },
@@ -213,6 +225,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Riobamba - Cuenca',
       descripcion: 'Ruta hacia la región austral',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Riobamba', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Azogues', orden: 1, distancia: 90.1, tiempo: 120, precio: 4.5 },
@@ -226,6 +239,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Riobamba - Macas',
       descripcion: 'Ruta hacia la amazonia sur',
+      tipoRuta: 'Interprovincial',
       paradas: [
         { ciudad: 'Riobamba', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Macas', orden: 1, distancia: 142.6, tiempo: 210, precio: 7.1 },
@@ -237,6 +251,7 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
     {
       nombre: 'Riobamba - Guaranda - Babahoyo',
       descripcion: 'Ruta hacia Los Ríos vía Guaranda',
+      tipoRuta: 'Ejecutivo',
       paradas: [
         { ciudad: 'Riobamba', orden: 0, distancia: 0, tiempo: 0, precio: 0 },
         { ciudad: 'Guaranda', orden: 1, distancia: 68.3, tiempo: 85, precio: 3.4 },
@@ -255,12 +270,17 @@ export async function seedRutas(prisma: PrismaClient, tenants: any[]) {
   for (let tenantIndex = 0; tenantIndex < tenants.length; tenantIndex++) {
     const tenant = tenants[tenantIndex];
     const rutasTenant = allRutas[tenantIndex];
+    const tiposRutaBusTenant = tiposRutaBus.filter(trb => trb.tenantId === tenant.id);
     
     for (const rutaData of rutasTenant) {
+      // Encontrar el tipo de ruta correspondiente
+      const tipoRutaBus = tiposRutaBusTenant.find(trb => trb.nombre === rutaData.tipoRuta);
+      
       // Crear la ruta
       const ruta = await prisma.ruta.create({
         data: {
           tenantId: tenant.id,
+          tipoRutaBusId: tipoRutaBus.id,
           nombre: rutaData.nombre,
           resolucionId: resolucionesANT[tenantIndex % resolucionesANT.length].id,
           descripcion: rutaData.descripcion,
