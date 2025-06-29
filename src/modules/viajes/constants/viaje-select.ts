@@ -12,6 +12,8 @@ export const VIAJE_SELECT: Prisma.ViajeSelect = {
   capacidadTotal: true,
   asientosOcupados: true,
   generacion: true,
+  horarioRutaId: true,
+  busId: true
 };
 
 export const VIAJE_SELECT_WITH_RELATIONS: Prisma.ViajeSelect = {

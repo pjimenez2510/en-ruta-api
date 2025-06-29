@@ -358,9 +358,18 @@ export class AsientosService {
       return await this.procesarCreacionAsientos(tx, pisoBusId, asientos);
     }
 
-    return await this.prisma.$transaction(async (txClient) => {
-      return await this.procesarCreacionAsientos(txClient, pisoBusId, asientos);
-    });
+    return await this.prisma.$transaction(
+      async (txClient) => {
+        return await this.procesarCreacionAsientos(
+          txClient,
+          pisoBusId,
+          asientos,
+        );
+      },
+      {
+        timeout: 30000,
+      },
+    );
   }
 
   private async procesarCreacionAsientos(

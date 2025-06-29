@@ -195,6 +195,8 @@ export class ViajesService {
 
     const datosActualizacion: Prisma.ViajeUncheckedUpdateInput = {};
 
+    console.log(datos.busId, tenantId)
+
     if (datos.busId) {
       const bus = await this.prisma.bus.findUnique({
         where: { id: datos.busId, tenantId },
@@ -212,6 +214,8 @@ export class ViajesService {
           `El bus con ID ${datos.busId} no existe o no pertenece al tenant ${tenantId}`,
         );
       }
+
+      console.log(bus)
 
       // Validar que el bus sea del mismo tipo que la ruta del viaje
       const horarioRuta = await this.prisma.horarioRuta.findUnique({
