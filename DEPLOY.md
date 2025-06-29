@@ -22,7 +22,18 @@ Ve a tu repositorio → **Settings** → **Secrets and variables** → **Actions
 
 Agregar estos secrets:
 ```
-
+SERVER_HOST=45.14.225.213
+SERVER_USER=root
+SERVER_SSH_KEY=tu-clave-ssh-privada
+JWT_SECRET=en-ruta-2024
+JWT_EXPIRATION=360d
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
+EMAIL_USER=pjimenez2510@gmail.com
+EMAIL_PASSWORD=vbxj ddvn vnss qobl
+EMAIL_FROM_NAME=EnRuta
+EMAIL_FROM_ADDRESS=pjimenez2510@gmail.com
 ```
 
 ### **3. Hacer push:**
@@ -63,6 +74,19 @@ docker restart en-ruta-api en-ruta-db
 - **Usuario**: `enruta`
 - **Password**: `enruta123`
 - **Puerto**: `5432`
+
+## 🐳 **Desarrollo Local:**
+
+```bash
+# Iniciar todo
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener
+docker-compose down
+```
 
 ---
 

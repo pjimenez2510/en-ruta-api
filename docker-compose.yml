@@ -3,24 +3,24 @@ version: '3.8'
 services:
   # Base de datos PostgreSQL
   postgres:
-    image: postgres:15-alpine
-    container_name: en-ruta-postgres
+    image: postgres:15
+    container_name: en-ruta-db
     environment:
-      POSTGRES_DB: development_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
+      POSTGRES_DB: enruta_db
+      POSTGRES_USER: enruta
+      POSTGRES_PASSWORD: enruta123
     ports:
-      - "5434:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - en-ruta-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U enruta"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   # Aplicación NestJS
   api:
@@ -31,8 +31,8 @@ services:
     container_name: en-ruta-api
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:root@postgres:5432/development_db?schema=public
-      DIRECT_URL: postgresql://postgres:root@postgres:5432/development_db?schema=public
+      DATABASE_URL: postgresql://enruta:enruta123@postgres:5432/enruta_db?schema=public
+      DIRECT_URL: postgresql://enruta:enruta123@postgres:5432/enruta_db?schema=public
       JWT_SECRET: secret
       JWT_EXPIRATION: 360d
       PORT: 3000
