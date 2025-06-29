@@ -141,7 +141,7 @@ export class GeneracionViajesService {
 
       return viajesGenerados;
     }, {
-      timeout: 15000, // Aumentar timeout a 15 segundos
+      timeout: 30000, // Aumentar timeout a 15 segundos
     });
   }
 
