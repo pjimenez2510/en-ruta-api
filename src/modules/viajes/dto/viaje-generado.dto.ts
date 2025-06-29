@@ -19,6 +19,10 @@ export class ViajeGeneradoDto {
       id: number;
       nombre: string;
       descripcion?: string;
+      tipoRutaBus: {
+        id: number;
+        nombre: string;
+      };
     };
   };
 
@@ -30,6 +34,10 @@ export class ViajeGeneradoDto {
     numero: number;
     placa: string;
     totalAsientos: number;
+    tipoRutaBus: {
+      id: number;
+      nombre: string;
+    };
   };
 
   @ApiProperty({
