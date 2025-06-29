@@ -25,6 +25,12 @@ export const VIAJE_SELECT_WITH_RELATIONS: Prisma.ViajeSelect = {
           id: true,
           nombre: true,
           descripcion: true,
+          tipoRutaBus: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
         },
       },
     },
@@ -35,6 +41,12 @@ export const VIAJE_SELECT_WITH_RELATIONS: Prisma.ViajeSelect = {
       numero: true,
       placa: true,
       totalAsientos: true,
+      tipoRutaBus: {
+        select: {
+          id: true,
+          nombre: true,
+        },
+      },
     },
   },
 };
@@ -50,6 +62,12 @@ export const VIAJE_SELECT_WITH_RELATIONS_WITH_PARADAS: Prisma.ViajeSelect = {
           id: true,
           nombre: true,
           descripcion: true,
+          tipoRutaBus: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
           paradas: {
             select: {
               id: true,
@@ -75,6 +93,12 @@ export const VIAJE_SELECT_WITH_RELATIONS_WITH_PARADAS: Prisma.ViajeSelect = {
       numero: true,
       placa: true,
       totalAsientos: true,
+      tipoRutaBus: {
+        select: {
+          id: true,
+          nombre: true,
+        },
+      },
     },
   },
 };

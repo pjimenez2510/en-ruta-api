@@ -46,6 +46,20 @@ export class RutasService {
     datos: CreateRutaDto,
     tx?: Prisma.TransactionClient,
   ) {
+    // Validar que el tipo de ruta de bus pertenezca al tenant
+    const tipoRutaBus = await this.prisma.tipoRutaBus.findFirst({
+      where: {
+        id: datos.tipoRutaBusId,
+        tenantId,
+      },
+    });
+
+    if (!tipoRutaBus) {
+      throw new NotFoundException(
+        `El tipo de ruta de bus con ID ${datos.tipoRutaBusId} no existe o no pertenece al tenant ${tenantId}`,
+      );
+    }
+
     const existente = await this.prisma.ruta.findUnique({
       where: {
         tenantId_nombre: {
@@ -64,6 +78,7 @@ export class RutasService {
     return await (tx || this.prisma).ruta.create({
       data: {
         tenantId,
+        tipoRutaBusId: datos.tipoRutaBusId,
         resolucionId: datos.resolucionId,
         nombre: datos.nombre,
         descripcion: datos.descripcion,
@@ -80,6 +95,22 @@ export class RutasService {
     tx?: Prisma.TransactionClient,
   ) {
     await this.obtenerRuta({ id });
+
+    // Validar que el tipo de ruta de bus pertenezca al tenant si se está actualizando
+    if (datos.tipoRutaBusId) {
+      const tipoRutaBus = await this.prisma.tipoRutaBus.findFirst({
+        where: {
+          id: datos.tipoRutaBusId,
+          tenantId,
+        },
+      });
+
+      if (!tipoRutaBus) {
+        throw new NotFoundException(
+          `El tipo de ruta de bus con ID ${datos.tipoRutaBusId} no existe o no pertenece al tenant ${tenantId}`,
+        );
+      }
+    }
 
     if (datos.nombre) {
       const existente = await this.prisma.ruta.findFirst({

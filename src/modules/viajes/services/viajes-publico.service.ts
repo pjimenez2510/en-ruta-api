@@ -43,6 +43,12 @@ export class ViajesPublicoService {
           },
           orderBy: { orden: 'asc' },
         },
+        tipoRutaBus: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
       },
     });
 
@@ -105,10 +111,14 @@ export class ViajesPublicoService {
           ...viaje,
           precio: precioSegmento,
           tiempoViaje: tiempoSegmento,
+          tipoRuta: viaje.horarioRuta.ruta.tipoRutaBus,
         };
       }
 
-      return viaje;
+      return {
+        ...viaje,
+        tipoRuta: viaje.horarioRuta.ruta.tipoRutaBus,
+      };
     });
   }
 

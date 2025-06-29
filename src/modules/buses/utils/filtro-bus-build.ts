@@ -17,6 +17,7 @@ export const filtroBusBuild = (
     anioFabricacion,
     tipoCombustible,
     modeloBusId,
+    tipoRutaBusId,
     estado,
   } = filtro;
 
@@ -38,6 +39,10 @@ export const filtroBusBuild = (
 
   if (modeloBusId !== undefined) {
     where.modeloBusId = modeloBusId;
+  }
+
+  if (tipoRutaBusId !== undefined) {
+    where.tipoRutaBusId = tipoRutaBusId;
   }
 
   if (estado) {
