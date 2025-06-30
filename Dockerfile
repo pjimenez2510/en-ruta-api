@@ -1,6 +1,5 @@
 # Etapa de construcción
 FROM node:20-alpine AS builder
-
 WORKDIR /app
 
 # Copiar archivos de configuración
@@ -31,21 +30,24 @@ RUN adduser -S nestjs -u 1001
 
 WORKDIR /app
 
+# Dar permisos completos al directorio /app al usuario nestjs
+RUN chown -R nestjs:nodejs /app
+
+# Cambiar al usuario no-root ANTES de cualquier instalación
+USER nestjs
+
 # Copiar archivos de configuración
-COPY package*.json ./
-COPY prisma ./prisma/
+COPY --chown=nestjs:nodejs package*.json ./
+COPY --chown=nestjs:nodejs prisma ./prisma/
 
 # Instalar solo dependencias de producción
 RUN npm ci --omit=dev && npm cache clean --force
 
-# Generar cliente de Prisma para producción
+# Generar cliente de Prisma como el usuario correcto
 RUN npx prisma generate
 
 # Copiar el build desde la etapa anterior
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-
-# Cambiar al usuario no-root
-USER nestjs
 
 # Exponer puerto
 EXPOSE 3000

@@ -45,11 +45,11 @@ export class TenantsController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getById('cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.getById('cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Obtiene los detalles completos de una cooperativa por su ID. Los administradores de cooperativa solo pueden ver su propia información.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get(':id')
   async obtenerTenantPorId(@Param('id', ParseIntPipe) id: number) {
     const tenant = await this.tenantsService.obtenerTenant({ id });
@@ -57,11 +57,11 @@ export class TenantsController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('cooperativa', [TipoUsuario.ADMIN_SISTEMA], 
+    CommonDescriptions.create('cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Crea una nueva cooperativa en el sistema. Solo administradores del sistema pueden crear cooperativas. Incluye configuración inicial completa.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearTenant(@Body() createTenantDto: CreateTenantDto) {
@@ -73,11 +73,11 @@ export class TenantsController {
     createApiOperation({
       summary: 'Actualizar información de cooperativa',
       description: 'Actualiza la información de una cooperativa. Los administradores del sistema pueden actualizar cualquier cooperativa, mientras que los administradores de cooperativa solo pueden actualizar su propia información.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
     })
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarTenant(
     @Param('id', ParseIntPipe) id: number,
@@ -109,11 +109,11 @@ export class TenantsController {
     createApiOperation({
       summary: 'Desactivar una cooperativa',
       description: 'Desactiva una cooperativa del sistema. Solo administradores del sistema pueden desactivar cooperativas. Las cooperativas desactivadas no podrán operar.',
-      roles: [TipoUsuario.ADMIN_SISTEMA],
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
     })
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async desactivarTenant(@Param('id', ParseIntPipe) id: number) {
     const tenant = await this.tenantsService.desactivarTenant(id);
