@@ -27,7 +27,10 @@ import {
   CreateAsientosMasivoDto,
 } from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
+import {
+  createApiOperation,
+  CommonDescriptions,
+} from '../../common/utils/swagger-descriptions.util';
 import { filtroAsientoBuild } from './utils/filtro-asiento-build';
 
 @ApiTags('asientos')
@@ -37,8 +40,11 @@ export class AsientosController {
   constructor(private readonly asientosService: AsientosService) {}
 
   @ApiOperation(
-    CommonDescriptions.getAll('asientos', [TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA], 
-    'Lista todos los asientos de la cooperativa actual con filtros opcionales por bus, estado, tipo, etc. Incluye información del piso y bus asociado.')
+    CommonDescriptions.getAll(
+      'asientos',
+      [TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA],
+      'Lista todos los asientos de la cooperativa actual con filtros opcionales por bus, estado, tipo, etc. Incluye información del piso y bus asociado.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA)
@@ -53,8 +59,10 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getPublic('asientos', 
-    'Lista todos los asientos disponibles públicamente con filtros opcionales. Útil para mostrar la distribución de asientos en aplicaciones cliente.')
+    CommonDescriptions.getPublic(
+      'asientos',
+      'Lista todos los asientos disponibles públicamente con filtros opcionales. Útil para mostrar la distribución de asientos en aplicaciones cliente.',
+    ),
   )
   @Get('publico')
   async obtenerAsientosPublico(@Query() filtro: FiltroAsientoDto) {
@@ -64,8 +72,10 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getPublic('asiento específico', 
-    'Obtiene los detalles completos de un asiento por su ID. Incluye información del tipo, ubicación, estado y bus asociado.')
+    CommonDescriptions.getPublic(
+      'asiento específico',
+      'Obtiene los detalles completos de un asiento por su ID. Incluye información del tipo, ubicación, estado y bus asociado.',
+    ),
   )
   @Get('publico/:id')
   async obtenerAsientoPublicoPorId(@Param('id', ParseIntPipe) id: number) {
@@ -75,8 +85,11 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getById('asiento', [TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA], 
-    'Obtiene los detalles completos de un asiento de la cooperativa actual. Verifica permisos antes de mostrar la información.')
+    CommonDescriptions.getById(
+      'asiento',
+      [TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA],
+      'Obtiene los detalles completos de un asiento de la cooperativa actual. Verifica permisos antes de mostrar la información.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(TipoUsuario.ADMIN_SISTEMA, TipoUsuario.PERSONAL_COOPERATIVA)
@@ -112,11 +125,14 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Crea un nuevo asiento individual en un piso de bus específico. Verifica que el piso pertenezca a la cooperativa actual antes de crear el asiento.')
+    CommonDescriptions.create(
+      'asiento',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Crea un nuevo asiento individual en un piso de bus específico. Verifica que el piso pertenezca a la cooperativa actual antes de crear el asiento.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearAsiento(
@@ -140,12 +156,13 @@ export class AsientosController {
   @ApiOperation(
     createApiOperation({
       summary: 'Crear múltiples asientos de manera masiva',
-      description: 'Crea múltiples asientos automáticamente para un piso específico basado en una plantilla o configuración. Útil para configurar rápidamente la distribución de asientos en un bus nuevo.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
-    })
+      description:
+        'Crea múltiples asientos automáticamente para un piso específico basado en una plantilla o configuración. Útil para configurar rápidamente la distribución de asientos en un bus nuevo.',
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+    }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post('masivo')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: CreateAsientosMasivoDto })
@@ -170,11 +187,14 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Actualiza la información de un asiento existente como tipo, ubicación o características especiales. Verifica permisos de la cooperativa antes de actualizar.')
+    CommonDescriptions.update(
+      'asiento',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Actualiza la información de un asiento existente como tipo, ubicación o características especiales. Verifica permisos de la cooperativa antes de actualizar.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarAsiento(
     @Param('id', ParseIntPipe) id: number,
@@ -196,11 +216,14 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.delete('asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Elimina un asiento del sistema. CUIDADO: Esta acción no se puede deshacer y puede afectar reservas existentes.')
+    CommonDescriptions.delete(
+      'asiento',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Elimina un asiento del sistema. CUIDADO: Esta acción no se puede deshacer y puede afectar reservas existentes.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async eliminarAsiento(
     @Param('id', ParseIntPipe) id: number,
@@ -221,11 +244,15 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('asiento', 'DISPONIBLE', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Cambia el estado del asiento a disponible para venta. Útil cuando un asiento sale de mantenimiento o se habilita para uso.')
+    CommonDescriptions.changeState(
+      'asiento',
+      'DISPONIBLE',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Cambia el estado del asiento a disponible para venta. Útil cuando un asiento sale de mantenimiento o se habilita para uso.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/disponible')
   async establecerDisponible(
     @Param('id', ParseIntPipe) id: number,
@@ -249,11 +276,15 @@ export class AsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('asiento', 'MANTENIMIENTO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Cambia el estado del asiento a mantenimiento. El asiento no estará disponible para venta hasta que vuelva a estar disponible.')
+    CommonDescriptions.changeState(
+      'asiento',
+      'MANTENIMIENTO',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Cambia el estado del asiento a mantenimiento. El asiento no estará disponible para venta hasta que vuelva a estar disponible.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/mantenimiento')
   async establecerMantenimiento(
     @Param('id', ParseIntPipe) id: number,

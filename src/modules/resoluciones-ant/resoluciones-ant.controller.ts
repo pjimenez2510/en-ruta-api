@@ -67,11 +67,11 @@ export class ResolucionesAntController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('resolución ANT', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.create('resolución ANT', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Crea una nueva resolución ANT en el sistema. Registra habilitaciones, permisos y documentos regulatorios oficiales.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearResolucion(@Body() createResolucionAntDto: CreateResolucionAntDto) {
@@ -82,11 +82,11 @@ export class ResolucionesAntController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('resolución ANT', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.update('resolución ANT', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Actualiza una resolución ANT existente. Permite modificar información de vigencia, contenido y estado de la resolución.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarResolucion(
     @Param('id', ParseIntPipe) id: number,
@@ -99,22 +99,22 @@ export class ResolucionesAntController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('resolución ANT', 'INACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('resolución ANT', 'INACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Desactiva una resolución ANT. Las resoluciones inactivas no se consideran vigentes para operaciones.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/desactivar')
   async desactivarResolucion(@Param('id', ParseIntPipe) id: number) {
     return await this.resolucionesAntService.desactivarResolucion(id);
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('resolución ANT', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('resolución ANT', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Activa una resolución ANT. Las resoluciones activas se consideran vigentes para las operaciones de transporte.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/activar')
   async activarResolucion(@Param('id', ParseIntPipe) id: number) {
     return await this.resolucionesAntService.activarResolucion(id);

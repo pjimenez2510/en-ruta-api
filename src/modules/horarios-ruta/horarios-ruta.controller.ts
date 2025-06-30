@@ -128,11 +128,11 @@ export class HorariosRutaController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.create('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Crea un nuevo horario de ruta. Define los horarios de salida, llegada y configuraciones de frecuencia para una ruta específica.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearHorarioRuta(
@@ -144,11 +144,11 @@ export class HorariosRutaController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.update('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Actualiza un horario de ruta existente. Permite modificar horarios, frecuencias y configuraciones operativas.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarHorarioRuta(
     @Param('id', ParseIntPipe) id: number,
@@ -163,11 +163,11 @@ export class HorariosRutaController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('horario de ruta', 'INACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('horario de ruta', 'INACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Desactiva un horario de ruta. Los horarios inactivos no se usarán para la generación automática de viajes.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/desactivar')
   async desactivarHorarioRuta(
     @Param('id', ParseIntPipe) id: number,
@@ -177,11 +177,11 @@ export class HorariosRutaController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('horario de ruta', 'ACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('horario de ruta', 'ACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Activa un horario de ruta. Los horarios activos se usarán para la generación automática de viajes.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/activar')
   async activarHorarioRuta(
     @Param('id', ParseIntPipe) id: number,
@@ -192,11 +192,11 @@ export class HorariosRutaController {
   }
 
   @ApiOperation(
-    CommonDescriptions.delete('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.delete('horario de ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Elimina un horario de ruta del sistema. CUIDADO: Esta acción puede afectar la generación de viajes automáticos.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async eliminarHorarioRuta(
     @Param('id', ParseIntPipe) id: number,

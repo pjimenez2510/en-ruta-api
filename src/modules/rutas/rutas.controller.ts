@@ -117,11 +117,11 @@ export class RutasController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.create('ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Crea una nueva ruta en la cooperativa. Requiere ciudades origen/destino, precio base y configuración de paradas.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearRuta(
@@ -133,11 +133,11 @@ export class RutasController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.update('ruta', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Actualiza una ruta existente. Permite modificar precios, paradas, distancia y otros parámetros de la ruta.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarRuta(
     @Param('id', ParseIntPipe) id: number,
@@ -159,11 +159,11 @@ export class RutasController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('ruta', 'INACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('ruta', 'INACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Desactiva una ruta. Las rutas inactivas no se mostrarán en búsquedas públicas ni se podrán asignar a nuevos viajes.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/desactivar')
   async desactivarRuta(
     @Param('id', ParseIntPipe) id: number,
@@ -180,11 +180,11 @@ export class RutasController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('ruta', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('ruta', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Activa una ruta. Las rutas activas estarán disponibles para búsquedas públicas y asignación de viajes.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/activar')
   async activarRuta(
     @Param('id', ParseIntPipe) id: number,

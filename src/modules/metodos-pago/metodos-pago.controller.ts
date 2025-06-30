@@ -129,11 +129,11 @@ export class MetodosPagoController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.create('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Crea un nuevo método de pago. Define tipos de pago, comisiones, límites y configuraciones específicas para la cooperativa.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearMetodoPago(
@@ -148,11 +148,11 @@ export class MetodosPagoController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.update('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Actualiza un método de pago existente. Permite modificar comisiones, límites, estado y configuraciones operativas.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarMetodoPago(
     @Param('id', ParseIntPipe) id: number,
@@ -167,11 +167,11 @@ export class MetodosPagoController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('método de pago', 'INACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('método de pago', 'INACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Desactiva un método de pago. Los métodos inactivos no estarán disponibles para nuevas ventas.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/desactivar')
   async desactivarMetodoPago(
     @Param('id', ParseIntPipe) id: number,
@@ -184,11 +184,11 @@ export class MetodosPagoController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('método de pago', 'ACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('método de pago', 'ACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Activa un método de pago. Los métodos activos estarán disponibles para usar en ventas.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/activar')
   async activarMetodoPago(
     @Param('id', ParseIntPipe) id: number,
@@ -201,11 +201,11 @@ export class MetodosPagoController {
   }
 
   @ApiOperation(
-    CommonDescriptions.delete('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.delete('método de pago', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Elimina un método de pago del sistema. CUIDADO: Esta acción puede afectar ventas existentes que usen este método.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async eliminarMetodoPago(
     @Param('id', ParseIntPipe) id: number,

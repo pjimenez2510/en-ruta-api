@@ -35,10 +35,10 @@ export class TipoAsientosController {
   constructor(private readonly tipoAsientosService: TipoAsientosService) {}
 
   @ApiOperation(
-    CommonDescriptions.getAll('tipos de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.getAll('tipos de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Lista todos los tipos de asiento de la cooperativa actual. Incluye categorías como VIP, ejecutivo, económico con sus características y precios.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get()
   async obtenerTiposAsiento(
     @Query() filtro: FiltroTipoAsientoDto,
@@ -51,10 +51,10 @@ export class TipoAsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getById('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.getById('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Obtiene los detalles completos de un tipo de asiento específico. Incluye características, precios y configuraciones.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get(':id')
   async obtenerTipoAsientoPorId(
     @Param('id', ParseIntPipe) id: number,
@@ -68,10 +68,10 @@ export class TipoAsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.create('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Crea un nuevo tipo de asiento para la cooperativa. Define categorías, características, precios y niveles de servicio.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearTipoAsiento(
@@ -86,10 +86,10 @@ export class TipoAsientosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.update('tipo de asiento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Actualiza un tipo de asiento existente. Permite modificar características, precios y configuraciones del servicio.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarTipoAsiento(
     @Param('id', ParseIntPipe) id: number,
@@ -112,10 +112,10 @@ export class TipoAsientosController {
     createApiOperation({
       summary: 'Desactivar tipo de asiento',
       description: 'Desactiva un tipo de asiento de la cooperativa. Los tipos desactivados no estarán disponibles para nuevos asientos pero se mantienen para compatibilidad histórica.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
     })
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async desactivarTipoAsiento(
     @Param('id', ParseIntPipe) id: number,

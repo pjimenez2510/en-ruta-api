@@ -34,10 +34,10 @@ export class ModelosBusController {
   constructor(private readonly modelosBusService: ModelosBusService) {}
 
   @ApiOperation(
-    CommonDescriptions.getAll('modelos de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.getAll('modelos de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Lista todos los modelos de bus disponibles en el sistema. Incluye información de marca, capacidad, características y plantillas de asientos.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get()
   async obtenerModelosBus(@Query() filtro: FiltroModeloBusDto) {
     const modelosBus = await this.modelosBusService.obtenerModelosBus(
@@ -47,10 +47,10 @@ export class ModelosBusController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getById('modelo de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.getById('modelo de bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Obtiene los detalles completos de un modelo de bus específico incluyendo especificaciones técnicas y configuraciones disponibles.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get(':id')
   async obtenerModeloBusPorId(@Param('id', ParseIntPipe) id: number) {
     const modeloBus = await this.modelosBusService.obtenerModeloBus({ id });

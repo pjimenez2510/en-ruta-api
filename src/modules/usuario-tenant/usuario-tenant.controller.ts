@@ -37,10 +37,10 @@ export class UsuarioTenantController {
   constructor(private readonly usuarioTenantService: UsuarioTenantService) {}
 
   @ApiOperation(
-    CommonDescriptions.getAll('relaciones usuario-cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.getAll('relaciones usuario-cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Lista todas las relaciones entre usuarios y la cooperativa actual. Incluye roles asignados, estado y información personal.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get()
   async obtenerUsuariosTenant(
     @Query() filtro: FiltroUsuarioTenantDto,
@@ -54,10 +54,10 @@ export class UsuarioTenantController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getById('relación usuario-cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.getById('relación usuario-cooperativa', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Obtiene los detalles de una relación específica entre usuario y cooperativa. Incluye rol, permisos y datos personales.')
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get(':id')
   async obtenerUsuarioTenantPorId(
     @Param('id', ParseIntPipe) id: number,
@@ -79,10 +79,10 @@ export class UsuarioTenantController {
     createApiOperation({
       summary: 'Crear usuario con asignación a cooperativa',
       description: 'Crea un nuevo usuario, lo asigna a la cooperativa con un rol específico y guarda sus datos personales. Proceso integral de alta de personal.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
     })
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearUsuarioTenant(
@@ -99,10 +99,10 @@ export class UsuarioTenantController {
     createApiOperation({
       summary: 'Actualizar usuario y su relación con cooperativa',
       description: 'Actualiza en una sola operación los datos del usuario, su relación con la cooperativa y su información personal. Permite cambios de rol y datos.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
     })
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarUsuarioTenant(
     @Param('id', ParseIntPipe) id: number,
@@ -130,10 +130,10 @@ export class UsuarioTenantController {
     createApiOperation({
       summary: 'Asignar información personal a usuario-cooperativa',
       description: 'Asigna o actualiza la información personal y laboral de un usuario en la cooperativa. Incluye datos de contacto, cargo y detalles específicos del trabajo.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
     })
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post(':id/asignar-info-personal')
   async asignarInfoPersonal(
     @Param('id', ParseIntPipe) id: number,
@@ -159,10 +159,10 @@ export class UsuarioTenantController {
     createApiOperation({
       summary: 'Desactivar relación usuario-cooperativa',
       description: 'Desactiva la relación entre un usuario y la cooperativa. El usuario no podrá acceder a recursos de la cooperativa pero se mantiene en el sistema para integridad histórica.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
+      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
     })
   )
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async desactivarUsuarioTenant(
     @Param('id', ParseIntPipe) id: number,

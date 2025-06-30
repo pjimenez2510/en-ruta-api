@@ -129,11 +129,11 @@ export class ConfiguracionDescuentosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.create('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Crea una nueva configuración de descuento. Define porcentajes, condiciones de aplicación y tipos de descuento disponibles.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearConfiguracionDescuento(
@@ -148,11 +148,11 @@ export class ConfiguracionDescuentosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.update('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Actualiza una configuración de descuento existente. Permite modificar porcentajes, condiciones y estado de la configuración.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarConfiguracionDescuento(
     @Param('id', ParseIntPipe) id: number,
@@ -167,11 +167,11 @@ export class ConfiguracionDescuentosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('configuración de descuento', 'DESACTIVADA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('configuración de descuento', 'DESACTIVADA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Desactiva una configuración de descuento. Los descuentos desactivados no se aplicarán en nuevas ventas.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/desactivar')
   async desactivarConfiguracionDescuento(
     @Param('id', ParseIntPipe) id: number,
@@ -184,11 +184,11 @@ export class ConfiguracionDescuentosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('configuración de descuento', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.changeState('configuración de descuento', 'ACTIVA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Activa una configuración de descuento. Los descuentos activos se aplicarán automáticamente según sus condiciones.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/activar')
   async activarConfiguracionDescuento(
     @Param('id', ParseIntPipe) id: number,
@@ -201,11 +201,11 @@ export class ConfiguracionDescuentosController {
   }
 
   @ApiOperation(
-    CommonDescriptions.delete('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
+    CommonDescriptions.delete('configuración de descuento', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA], 
     'Elimina permanentemente una configuración de descuento. CUIDADO: Esta acción no se puede deshacer.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async eliminarConfiguracionDescuento(
     @Param('id', ParseIntPipe) id: number,

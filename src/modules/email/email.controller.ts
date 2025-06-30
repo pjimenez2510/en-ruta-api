@@ -272,7 +272,7 @@ export class EmailController {
     type: EmailResponseDto,
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post('debug/venta/:ventaId/test-confirmacion')
   @HttpCode(HttpStatus.OK)
   async testConfirmacionVenta(

@@ -18,9 +18,17 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { TipoUsuario, RolUsuario, EstadoBus } from '@prisma/client';
 import { TenantActual } from '../../common/decorators/tenant-actual.decorator';
-import { CreateBusDto, UpdateBusDto, FiltroBusDto, ConsultaDisponibilidadBusDto } from './dto';
+import {
+  CreateBusDto,
+  UpdateBusDto,
+  FiltroBusDto,
+  ConsultaDisponibilidadBusDto,
+} from './dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
-import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
+import {
+  createApiOperation,
+  CommonDescriptions,
+} from '../../common/utils/swagger-descriptions.util';
 import { filtroBusBuild } from './utils/filtro-bus-build';
 
 @ApiTags('buses')
@@ -30,16 +38,20 @@ export class BusesController {
   constructor(private readonly busesService: BusesService) {}
 
   @ApiOperation(
-    CommonDescriptions.getAll('buses', [
-      TipoUsuario.ADMIN_SISTEMA,
-      RolUsuario.ADMIN_COOPERATIVA,
-      RolUsuario.OFICINISTA,
-    ], 'Lista todos los buses de la cooperativa actual con filtros por modelo, estado, placa, etc. Solo muestra buses de la cooperativa autenticada.')
+    CommonDescriptions.getAll(
+      'buses',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA,
+        RolUsuario.OFICINISTA,
+      ],
+      'Lista todos los buses de la cooperativa actual con filtros por modelo, estado, placa, etc. Solo muestra buses de la cooperativa autenticada.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
-    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA,
     RolUsuario.OFICINISTA,
   )
   @Get()
@@ -54,8 +66,10 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getPublic('buses', 
-    'Lista todos los buses de todas las cooperativas. Endpoint público útil para mostrar información general de la flota disponible en aplicaciones cliente.')
+    CommonDescriptions.getPublic(
+      'buses',
+      'Lista todos los buses de todas las cooperativas. Endpoint público útil para mostrar información general de la flota disponible en aplicaciones cliente.',
+    ),
   )
   @Get('publico')
   async obtenerBusesPublico(@Query() filtro: FiltroBusDto) {
@@ -66,9 +80,10 @@ export class BusesController {
   @ApiOperation(
     createApiOperation({
       summary: 'Obtener buses de una cooperativa específica',
-      description: 'Lista todos los buses de una cooperativa específica. Endpoint público que permite a los usuarios ver la flota de buses de cualquier cooperativa.',
+      description:
+        'Lista todos los buses de una cooperativa específica. Endpoint público que permite a los usuarios ver la flota de buses de cualquier cooperativa.',
       isPublic: true,
-    })
+    }),
   )
   @Get('cooperativa/:idCooperativa')
   async obtenerBusesDeUnaCooperativaPublico(
@@ -83,9 +98,10 @@ export class BusesController {
   @ApiOperation(
     createApiOperation({
       summary: 'Consultar disponibilidad de asientos en un bus',
-      description: 'Consulta la disponibilidad de asientos de un bus específico para un viaje y tramo determinado. Útil para mostrar asientos disponibles antes de la compra.',
+      description:
+        'Consulta la disponibilidad de asientos de un bus específico para un viaje y tramo determinado. Útil para mostrar asientos disponibles antes de la compra.',
       isPublic: true,
-    })
+    }),
   )
   @Get(':id/disponibilidad')
   async consultarDisponibilidadBus(
@@ -101,8 +117,10 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getPublic('bus específico', 
-    'Obtiene los detalles completos de un bus por su ID. Incluye información del modelo, capacidad, distribución de asientos y características.')
+    CommonDescriptions.getPublic(
+      'bus específico',
+      'Obtiene los detalles completos de un bus por su ID. Incluye información del modelo, capacidad, distribución de asientos y características.',
+    ),
   )
   @Get('publico/:id')
   async obtenerBusPublico(@Param('id', ParseIntPipe) id: number) {
@@ -110,18 +128,14 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getById('bus', [
-      TipoUsuario.ADMIN_SISTEMA,
-      RolUsuario.ADMIN_COOPERATIVA,
-      RolUsuario.OFICINISTA,
-    ], 'Obtiene los detalles completos de un bus de la cooperativa actual. Verifica permisos antes de mostrar la información.')
+    CommonDescriptions.getById(
+      'bus',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Obtiene los detalles completos de un bus de la cooperativa actual. Verifica permisos antes de mostrar la información.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(
-    TipoUsuario.ADMIN_SISTEMA,
-    RolUsuario.ADMIN_COOPERATIVA,
-    RolUsuario.OFICINISTA,
-  )
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Get(':id')
   async obtenerBusPorId(
     @Param('id', ParseIntPipe) id: number,
@@ -137,11 +151,14 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Crea un nuevo bus en la cooperativa. Requiere información del modelo, placa, capacidad y configuración de pisos/asientos.')
+    CommonDescriptions.create(
+      'bus',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Crea un nuevo bus en la cooperativa. Requiere información del modelo, placa, capacidad y configuración de pisos/asientos.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearBus(
@@ -153,11 +170,14 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('bus', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Actualiza la información de un bus existente como modelo, placa, capacidad o configuración. Solo se pueden actualizar buses de la cooperativa actual.')
+    CommonDescriptions.update(
+      'bus',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Actualiza la información de un bus existente como modelo, placa, capacidad o configuración. Solo se pueden actualizar buses de la cooperativa actual.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarBus(
     @Param('id', ParseIntPipe) id: number,
@@ -179,11 +199,15 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('bus', 'MANTENIMIENTO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Envía el bus a mantenimiento. El bus no estará disponible para asignar a viajes hasta que vuelva a estar activo.')
+    CommonDescriptions.changeState(
+      'bus',
+      'MANTENIMIENTO',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Envía el bus a mantenimiento. El bus no estará disponible para asignar a viajes hasta que vuelva a estar activo.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/mantenimiento')
   async enviarAMantenimiento(
     @Param('id', ParseIntPipe) id: number,
@@ -202,11 +226,15 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('bus', 'ACTIVO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Activa un bus para que esté disponible para asignar a viajes. El bus debe estar en buen estado para ser activado.')
+    CommonDescriptions.changeState(
+      'bus',
+      'ACTIVO',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Activa un bus para que esté disponible para asignar a viajes. El bus debe estar en buen estado para ser activado.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/activar')
   async activarBus(
     @Param('id', ParseIntPipe) id: number,
@@ -225,11 +253,15 @@ export class BusesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('bus', 'RETIRADO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Retira un bus del servicio activo. Los buses retirados no se pueden asignar a viajes pero se mantienen en el sistema por registros históricos.')
+    CommonDescriptions.changeState(
+      'bus',
+      'RETIRADO',
+      [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA],
+      'Retira un bus del servicio activo. Los buses retirados no se pueden asignar a viajes pero se mantienen en el sistema por registros históricos.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id/retirar')
   async retirarBus(
     @Param('id', ParseIntPipe) id: number,

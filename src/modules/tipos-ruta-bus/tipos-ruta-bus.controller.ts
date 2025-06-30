@@ -77,10 +77,11 @@ export class TiposRutaBusController {
     CommonDescriptions.create('tipo de ruta de bus', [
       TipoUsuario.ADMIN_SISTEMA,
       RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
     ], 'Crea un nuevo tipo de ruta de bus para la cooperativa.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearTipoRutaBus(
@@ -98,10 +99,11 @@ export class TiposRutaBusController {
     CommonDescriptions.update('tipo de ruta de bus', [
       TipoUsuario.ADMIN_SISTEMA,
       RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
     ], 'Actualiza la información de un tipo de ruta de bus existente.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Put(':id')
   async actualizarTipoRutaBus(
     @Param('id', ParseIntPipe) id: number,
@@ -120,10 +122,11 @@ export class TiposRutaBusController {
     CommonDescriptions.delete('tipo de ruta de bus', [
       TipoUsuario.ADMIN_SISTEMA,
       RolUsuario.ADMIN_COOPERATIVA,
+      RolUsuario.OFICINISTA,
     ], 'Elimina un tipo de ruta de bus. Solo se puede eliminar si no tiene buses o rutas asociadas.')
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA)
   @Delete(':id')
   async eliminarTipoRutaBus(
     @Param('id', ParseIntPipe) id: number,

@@ -27,10 +27,18 @@ import {
   GenerarViajesDto,
   FiltroViajePublicoDto,
 } from './dto';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger';
 import { filtroViajeBuild } from './utils/filtro-viaje-build';
 import { ViajesPublicoService } from './services/viajes-publico.service';
-import { createApiOperation, CommonDescriptions } from '../../common/utils/swagger-descriptions.util';
+import {
+  createApiOperation,
+  CommonDescriptions,
+} from '../../common/utils/swagger-descriptions.util';
 
 @ApiTags('viajes')
 @ApiBearerAuth()
@@ -43,8 +51,16 @@ export class ViajesController {
   ) {}
 
   @ApiOperation(
-    CommonDescriptions.getAll('viajes', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA, RolUsuario.CONDUCTOR], 
-    'Permite filtrar por fecha, estado, ruta y otros criterios. Solo muestra los viajes de la cooperativa actual.')
+    CommonDescriptions.getAll(
+      'viajes',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+        RolUsuario.CONDUCTOR,
+      ],
+      'Permite filtrar por fecha, estado, ruta y otros criterios. Solo muestra los viajes de la cooperativa actual.',
+    ),
   )
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -61,12 +77,21 @@ export class ViajesController {
   @ApiOperation(
     createApiOperation({
       summary: 'Previsualizar la generación automática de viajes',
-      description: 'Simula la generación de viajes basada en horarios de ruta sin guardarlos en la base de datos. Útil para revisar antes de ejecutar la generación real.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
-    })
+      description:
+        'Simula la generación de viajes basada en horarios de ruta sin guardarlos en la base de datos. Útil para revisar antes de ejecutar la generación real.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
+  )
   @Post('generar/previsualizar')
   @HttpCode(HttpStatus.OK)
   async previsualizarGeneracion(
@@ -82,12 +107,21 @@ export class ViajesController {
   @ApiOperation(
     createApiOperation({
       summary: 'Generar y guardar viajes automáticamente',
-      description: 'Ejecuta la generación masiva de viajes basada en los horarios de ruta configurados. Los viajes se crean con estado PROGRAMADO.',
-      roles: [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA],
-    })
+      description:
+        'Ejecuta la generación masiva de viajes basada en los horarios de ruta configurados. Los viajes se crean con estado PROGRAMADO.',
+      roles: [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+    }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
+  )
   @Post('generar/ejecutar')
   @HttpCode(HttpStatus.CREATED)
   async generarYGuardarViajes(
@@ -101,18 +135,23 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getPublic('viajes con segmentos', 
-    'Endpoint público que muestra viajes de todas las cooperativas con información de segmentos y paradas. Ideal para aplicaciones cliente que muestran horarios de viajes.')
+    CommonDescriptions.getPublic(
+      'viajes con segmentos',
+      'Endpoint público que muestra viajes de todas las cooperativas con información de segmentos y paradas. Ideal para aplicaciones cliente que muestran horarios de viajes.',
+    ),
   )
   @Get('publico')
   async obtenerViajesPublico(@Query() filtro: FiltroViajePublicoDto) {
-    const viajes = await this.viajesPublicoService.obtenerViajesConSegmentos(filtro);
+    const viajes =
+      await this.viajesPublicoService.obtenerViajesConSegmentos(filtro);
     return viajes;
   }
 
   @ApiOperation(
-    CommonDescriptions.getPublic('viaje específico', 
-    'Obtiene los detalles completos de un viaje específico incluyendo información de ruta, bus, conductor y disponibilidad de asientos.')
+    CommonDescriptions.getPublic(
+      'viaje específico',
+      'Obtiene los detalles completos de un viaje específico incluyendo información de ruta, bus, conductor y disponibilidad de asientos.',
+    ),
   )
   @Get('publico/:id')
   async obtenerViajePublico(@Param('id', ParseIntPipe) id: number) {
@@ -121,8 +160,16 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.getById('viaje', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.OFICINISTA, RolUsuario.CONDUCTOR], 
-    'Solo se pueden obtener viajes de la cooperativa actual. Incluye información completa del viaje.')
+    CommonDescriptions.getById(
+      'viaje',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+        RolUsuario.CONDUCTOR,
+      ],
+      'Solo se pueden obtener viajes de la cooperativa actual. Incluye información completa del viaje.',
+    ),
   )
   @UseGuards(JwtAuthGuard)
   @Get(':id')
@@ -138,11 +185,22 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.create('viaje', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Crea un viaje manual. Requiere especificar bus, conductor, ruta y horarios. El viaje se crea con estado PROGRAMADO.')
+    CommonDescriptions.create(
+      'viaje',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+      'Crea un viaje manual. Requiere especificar bus, conductor, ruta y horarios. El viaje se crea con estado PROGRAMADO.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
+  )
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async crearViaje(
@@ -157,11 +215,22 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.update('viaje', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Permite actualizar información del viaje como horarios, bus asignado o conductor. No se puede modificar si el viaje ya está EN_RUTA o COMPLETADO.')
+    CommonDescriptions.update(
+      'viaje',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+      'Permite actualizar información del viaje como horarios, bus asignado o conductor. No se puede modificar si el viaje ya está EN_RUTA o COMPLETADO.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
+  )
   @Put(':id')
   async actualizarViaje(
     @Param('id', ParseIntPipe) id: number,
@@ -177,13 +246,23 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('viaje', 'EN_RUTA', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.CONDUCTOR], 
-    'Marca el viaje como iniciado. Solo se puede iniciar un viaje que esté en estado PROGRAMADO. Los conductores pueden iniciar sus propios viajes.')
+    CommonDescriptions.changeState(
+      'viaje',
+      'EN_RUTA',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+        RolUsuario.CONDUCTOR,
+      ],
+      'Marca el viaje como iniciado. Solo se puede iniciar un viaje que esté en estado PROGRAMADO. Los conductores pueden iniciar sus propios viajes.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
     RolUsuario.CONDUCTOR,
   )
   @Patch(':id/iniciar')
@@ -200,13 +279,23 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('viaje', 'COMPLETADO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.CONDUCTOR], 
-    'Marca el viaje como completado. Solo se puede completar un viaje que esté EN_RUTA. Los conductores pueden completar sus propios viajes.')
+    CommonDescriptions.changeState(
+      'viaje',
+      'COMPLETADO',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+        RolUsuario.CONDUCTOR,
+      ],
+      'Marca el viaje como completado. Solo se puede completar un viaje que esté EN_RUTA. Los conductores pueden completar sus propios viajes.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
     RolUsuario.CONDUCTOR,
   )
   @Patch(':id/completar')
@@ -223,11 +312,23 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('viaje', 'CANCELADO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Cancela un viaje. Los boletos vendidos para este viaje deben ser reembolsados manualmente. Solo administradores pueden cancelar viajes.')
+    CommonDescriptions.changeState(
+      'viaje',
+      'CANCELADO',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+      'Cancela un viaje. Los boletos vendidos para este viaje deben ser reembolsados manualmente. Solo administradores pueden cancelar viajes.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
+  )
   @Patch(':id/cancelar')
   async cancelarViaje(
     @Param('id', ParseIntPipe) id: number,
@@ -242,13 +343,23 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('viaje', 'RETRASADO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA, RolUsuario.CONDUCTOR], 
-    'Marca el viaje como retrasado. Útil para informar a los pasajeros sobre demoras. Los conductores pueden marcar sus propios viajes como retrasados.')
+    CommonDescriptions.changeState(
+      'viaje',
+      'RETRASADO',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+        RolUsuario.CONDUCTOR,
+      ],
+      'Marca el viaje como retrasado. Útil para informar a los pasajeros sobre demoras. Los conductores pueden marcar sus propios viajes como retrasados.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     TipoUsuario.ADMIN_SISTEMA,
     RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
     RolUsuario.CONDUCTOR,
   )
   @Patch(':id/retrasar')
@@ -265,11 +376,23 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.changeState('viaje', 'PROGRAMADO', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Reprograma un viaje cancelado o retrasado volviéndolo al estado PROGRAMADO. Solo administradores pueden reprogramar viajes.')
+    CommonDescriptions.changeState(
+      'viaje',
+      'PROGRAMADO',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+      'Reprograma un viaje cancelado o retrasado volviéndolo al estado PROGRAMADO. Solo administradores pueden reprogramar viajes.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
+  )
   @Patch(':id/reprogramar')
   async reprogramarViaje(
     @Param('id', ParseIntPipe) id: number,
@@ -284,11 +407,22 @@ export class ViajesController {
   }
 
   @ApiOperation(
-    CommonDescriptions.delete('viaje', [TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA], 
-    'Elimina permanentemente un viaje del sistema. CUIDADO: Esta acción no se puede deshacer y eliminará todos los boletos asociados.')
+    CommonDescriptions.delete(
+      'viaje',
+      [
+        TipoUsuario.ADMIN_SISTEMA,
+        RolUsuario.ADMIN_COOPERATIVA,
+        RolUsuario.OFICINISTA,
+      ],
+      'Elimina permanentemente un viaje del sistema. CUIDADO: Esta acción no se puede deshacer y eliminará todos los boletos asociados.',
+    ),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(TipoUsuario.ADMIN_SISTEMA, RolUsuario.ADMIN_COOPERATIVA)
+  @Roles(
+    TipoUsuario.ADMIN_SISTEMA,
+    RolUsuario.ADMIN_COOPERATIVA,
+    RolUsuario.OFICINISTA,
+  )
   @Delete(':id')
   async eliminarViaje(
     @Param('id', ParseIntPipe) id: number,
@@ -297,5 +431,4 @@ export class ViajesController {
     const viaje = await this.viajesService.eliminarViaje(id, tenantActual.id);
     return viaje;
   }
-
-} 
+}
