@@ -1,225 +1,217 @@
 # En Ruta API
 
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+API desarrollada con NestJS y Prisma para el sistema de gestión de cooperativas de transporte "En Ruta".
 
-API desarrollada con NestJS y Prisma para el proyecto En Ruta.
+## Descripción del Proyecto
 
-## Requisitos previos
+Este proyecto es el backend de "En Ruta", una aplicación diseñada para modernizar y optimizar la gestión de cooperativas de transporte terrestre. Provee una API RESTful para manejar recursos como rutas, horarios, buses, asientos, ventas de boletos, clientes y más.
 
-- Node.js (v20 o superior)
-- Docker y Docker Compose
-- npm o yarn
+## Requisitos Previos
 
-## Configuración del entorno
+- **Node.js**: v20 o superior.
+- **Docker** y **Docker Compose**: Para un entorno de desarrollo consistente.
+- **NPM** o **Yarn**: Gestor de paquetes de Node.js.
+- **Make**: (Opcional) Para ejecutar comandos de forma simplificada a través del `Makefile`.
 
-1. Clona este repositorio.
-2. Copia el archivo `.env.template` a `.env`:
+## Estructura de Carpetas
 
-```bash
-cp .env.template .env
+El proyecto sigue una arquitectura modular estándar en NestJS.
+
+```
+en-ruta-api/
+├── prisma/               # Esquema, migraciones y seeds de la base de datos.
+│   ├── migrations/
+│   └── schema.prisma
+├── src/                  # Código fuente de la aplicación.
+│   ├── common/           # Módulos y utilidades compartidas (guards, filters, etc.).
+│   ├── modules/          # Módulos de la aplicación (un módulo por cada entidad de negocio).
+│   └── main.ts           # Punto de entrada de la aplicación.
+├── test/                 # Pruebas end-to-end (e2e).
+├── .env.template         # Plantilla de variables de entorno.
+├── docker-compose.yml    # Orquestación de contenedores para desarrollo y producción.
+├── Dockerfile            # Definición del contenedor de la aplicación.
+├── Makefile              # Comandos para simplificar tareas comunes.
+└── package.json          # Dependencias y scripts del proyecto.
 ```
 
-3. Ajusta las variables de entorno en el archivo `.env` según tu configuración local si es necesario.
+## Instalación y Configuración
 
-## Iniciar el proyecto
+1.  **Clonar el repositorio:**
 
-### Con Makefile
+    ```bash
+    git clone <URL_DEL_REPOSITORIO>
+    cd en-ruta-api
+    ```
 
-Si tienes Make instalado, puedes usar los siguientes comandos para gestionar fácilmente el proyecto:
+2.  **Configurar variables de entorno:**
+    Copia el archivo de plantilla `.env.template` y renómbralo a `.env`. Ajusta las variables según tu entorno local.
 
-```bash
-# Iniciar el entorno de desarrollo
-make up-dev
+    ```bash
+    cp .env.template .env
+    ```
 
-# Detener el entorno de desarrollo
-make down-dev
+3.  **Instalar dependencias:**
+    Se recomienda usar el `Makefile` para instalar las dependencias dentro del contenedor de Docker.
+    ```bash
+    make i-dep
+    ```
+    Si no usas Make, puedes hacerlo directamente con Docker:
+    ```bash
+    docker exec -it en-ruta-api-dev npm install
+    ```
 
-# Conectar a la base de datos de desarrollo
-make connect-db-dev
+## Base de Datos
 
-# Instalar dependencias
-make i-dep
-```
+La gestión de la base de datos se realiza con Prisma.
 
-### Sin Makefile
+### Migraciones
 
-Si no tienes Make instalado, puedes usar directamente los comandos de Docker Compose:
-
-```bash
-# Iniciar el entorno de desarrollo
-docker compose up -d --build my-service-dev
-
-# Detener el entorno de desarrollo
-docker compose rm -s -v my-service-dev db-dev
-
-# Conectar a la base de datos de desarrollo
-docker exec -it db-dev psql -U postgres development_db
-
-# Instalar dependencias
-docker exec -it en-ruta-api-dev yarn install
-```
-
-### Desarrollo local (sin Docker)
-
-Si prefieres trabajar sin Docker, puedes configurar el proyecto localmente:
-
-1. Instala las dependencias:
+Para aplicar las migraciones y mantener el esquema de la base de datos actualizado:
 
 ```bash
-npm install
-# o
-yarn install
-```
-
-2. Asegúrate de tener una base de datos PostgreSQL corriendo y actualiza la variable `DATABASE_URL` en el archivo `.env`.
-
-3. Ejecuta las migraciones de Prisma:
-
-```bash
+# Ejecutar migraciones en el entorno de desarrollo
 npx prisma migrate dev
+
+# Crear una nueva migración después de modificar prisma.schema
+npx prisma migrate dev --name "nombre-descriptivo-de-la-migracion"
 ```
 
-4. Genera el cliente de Prisma:
+_Nota: Estos comandos se deben ejecutar dentro del contenedor de la aplicación si se usa Docker._
+
+### Seed (Poblar la base de datos)
+
+Para poblar la base de datos con datos iniciales:
 
 ```bash
-npx prisma generate
+npm run prisma:seed
 ```
 
-5. Inicia la aplicación en modo desarrollo:
+_Nota: Este comando se debe ejecutar dentro del contenedor de la aplicación si se usa Docker._
+
+### Prisma Studio
+
+Prisma Studio es una interfaz gráfica para visualizar y editar los datos de tu base de datos.
 
 ```bash
-npm run start:dev
-# o
-yarn start:dev
-```
-
-## Estructura del proyecto
-
-El proyecto sigue la estructura estándar de NestJS, con la adición de Prisma para la gestión de la base de datos:
-
-- `src/`: Código fuente de la aplicación
-- `prisma/`: Esquema y migraciones de Prisma
-- `dist/`: Código compilado (generado al construir)
-
-## Prisma Studio
-
-Para explorar y modificar la base de datos usando Prisma Studio:
-
-```bash
-# Con Docker
+# Con Docker (recomendado)
 docker exec -it en-ruta-api-dev npx prisma studio
 
 # Sin Docker
 npx prisma studio
 ```
 
-Esto abrirá una interfaz web en `http://localhost:5555` donde podrás gestionar tus datos.
+Se abrirá en `http://localhost:5555`.
 
-## Comandos útiles
+## Ejecución de la Aplicación
+
+### Usando Makefile (Recomendado)
+
+El `Makefile` simplifica la gestión del ciclo de vida de la aplicación con Docker.
+
+```bash
+# Iniciar el entorno de desarrollo (con hot-reload)
+make up-dev
+
+# Detener el entorno de desarrollo
+make down-dev
+
+# Ver logs de los servicios
+make logs-dev
+
+# Conectarse a la shell de la base de datos
+make connect-db-dev
+```
+
+### Usando Docker Compose
+
+Si no tienes `make`, puedes usar `docker-compose` directamente.
+
+```bash
+# Iniciar el entorno de desarrollo
+docker-compose -f docker-compose.yml --profile dev up -d --build
+
+# Detener el entorno de desarrollo
+docker-compose -f docker-compose.yml --profile dev down
+```
+
+### Ejecución Local (sin Docker)
+
+1.  Asegúrate de tener una instancia de PostgreSQL corriendo localmente.
+2.  Configura la variable `DATABASE_URL` en tu archivo `.env`.
+3.  Instala las dependencias: `npm install`.
+4.  Ejecuta las migraciones: `npx prisma migrate dev`.
+5.  Inicia la aplicación:
+    ```bash
+    npm run start:dev
+    ```
+
+## Ejecución de Pruebas
 
 ```bash
 # Ejecutar pruebas unitarias
 npm run test
 
-# Ejecutar pruebas e2e
+# Ejecutar pruebas end-to-end (e2e)
 npm run test:e2e
 
-# Verificar cobertura de pruebas
+# Ver el cubrimiento de las pruebas
 npm run test:cov
-
-# Generar nuevas migraciones tras cambios en el esquema de Prisma
-npx prisma migrate dev --name nombre_descriptivo
-
-# Aplicar migraciones en entorno de producción
-npx prisma migrate deploy
 ```
 
-## Documentación adicional
+_Nota: Las pruebas se ejecutan contra la base de datos de pruebas definida en `docker-compose.yml`._
 
-- [Documentación de NestJS](https://docs.nestjs.com)
-- [Documentación de Prisma](https://www.prisma.io/docs)
+## Variables de Entorno
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A continuación se describen las variables de entorno más importantes para la configuración del proyecto. Estas deben ser definidas en el archivo `.env`.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+| Variable         | Descripción                                            | Ejemplo                               |
+| :--------------- | :----------------------------------------------------- | :------------------------------------ |
+| `DATABASE_URL`   | URL de conexión a la base de datos PostgreSQL.         | `postgresql://user:pass@host:port/db` |
+| `PORT`           | Puerto en el que se expondrá la API.                   | `3000`                                |
+| `JWT_SECRET`     | Clave secreta para firmar los tokens de autenticación. | `secreto-muy-seguro`                  |
+| `JWT_EXPIRATION` | Tiempo de expiración para los tokens JWT.              | `1d`                                  |
+| `EMAIL_HOST`     | Host del servidor de correo para envío de emails.      | `smtp.example.com`                    |
+| `EMAIL_USER`     | Usuario para autenticarse en el servidor de correo.    | `user@example.com`                    |
+| `EMAIL_PASSWORD` | Contraseña para el servidor de correo.                 | `password`                            |
 
-## Description
+## Autenticación y Autorización
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+La API utiliza JSON Web Tokens (JWT) para proteger los endpoints. Para acceder a las rutas protegidas, se debe incluir un token de portador (`Bearer Token`) en la cabecera `Authorization` de la solicitud.
 
-## Project setup
+El sistema también cuenta con un sistema de autorización basado en roles para controlar el acceso a ciertas operaciones.
 
-```bash
-$ npm install
-```
+## Despliegue
 
-## Compile and run the project
+El despliegue de la aplicación está automatizado mediante GitHub Actions. Cada vez que se realiza un `push` a la rama `main`, se dispara un flujo de trabajo que despliega la última versión en el servidor de producción.
 
-```bash
-# development
-$ npm run start
+Para más detalles sobre la configuración del servidor y el proceso de despliegue, consulta el archivo [`DEPLOY.md`](./DEPLOY.md).
 
-# watch mode
-$ npm run start:dev
+## Documentación de la API
 
-# production mode
-$ npm run start:prod
-```
+La API está auto-documentada usando Swagger (OpenAPI). Una vez que la aplicación esté corriendo, puedes acceder a la documentación en:
 
-## Run tests
+- **`http://localhost:3000/api`**
 
-```bash
-# unit tests
-$ npm run test
+Desde esta interfaz puedes ver todos los endpoints disponibles y probarlos directamente.
 
-# e2e tests
-$ npm run test:e2e
+## Dependencias Clave
 
-# test coverage
-$ npm run test:cov
-```
+- **@nestjs/core**: El framework principal.
+- **@prisma/client**: ORM para la interacción con la base de datos.
+- **@nestjs/swagger**: Para la documentación de la API.
+- **@nestjs/jwt** & **@nestjs/passport**: Para la autenticación con JWT.
+- **class-validator** & **class-transformer**: Para la validación de DTOs.
 
-## Resources
+## Comandos Útiles
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+| Comando                  | Descripción                                                          |
+| ------------------------ | -------------------------------------------------------------------- |
+| `make up-dev`            | Inicia el entorno de desarrollo con Docker.                          |
+| `make down-dev`          | Detiene el entorno de desarrollo con Docker.                         |
+| `make i-dep`             | Instala/actualiza las dependencias de npm.                           |
+| `npm run start:dev`      | Inicia la aplicación en modo desarrollo con hot-reload (sin Docker). |
+| `npm run prisma:seed`    | Puebla la base de datos con datos de prueba.                         |
+| `npx prisma migrate dev` | Aplica migraciones a la base de datos de desarrollo.                 |
+| `npx prisma studio`      | Abre la interfaz gráfica de Prisma.                                  |
+| `npm run test`           | Ejecuta las pruebas unitarias.                                       |
+| `npm run test:e2e`       | Ejecuta las pruebas end-to-end.                                      |
